@@ -1,4 +1,4 @@
-package com.stratio.security.authorization.controller;
+package com.stratio.aip.controller;
 
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,8 +13,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ProtectedController.class)
-public class ProtectedControllerTest {
+@WebMvcTest(MicroCiController.class)
+public class MicroCiControllerTest {
 
   @Autowired
   protected MockMvc mvc;

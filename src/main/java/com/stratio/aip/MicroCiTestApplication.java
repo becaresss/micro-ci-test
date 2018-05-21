@@ -1,4 +1,4 @@
-package com.stratio.security.authorization;
+package com.stratio.aip;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
