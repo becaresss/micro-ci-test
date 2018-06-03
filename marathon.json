@@ -17,18 +17,14 @@
   "gpus": 0,
   "executor": null,
   "constraints": null,
-  "fetch": [
-    {
-	"uri": "file:///opt/docker/docker.tar.gz"      
-    }
-  ],
+  "fetch": null,
   "storeUrls": null,
   "backoffSeconds": 1,
   "backoffFactor": 1.15,
   "maxLaunchDelaySeconds": 3600,
   "container": {
     "docker": {
-      "image": "stratioci/micro-ci-test:1.0.0-SNAPSHOT",
+      "image": "csfstratio/micro-ci-test:1.0.0-SNAPSHOT",
       "forcePullImage": true,
       "privileged": false,
       "network": "HOST"
@@ -53,7 +49,7 @@
   },
   "labels": {
     "HAPROXY_GROUP": "external",
-    "HAPROXY_0_PORT": "10188"
+    "HAPROXY_0_PORT": "50505"
   },
   "acceptedResourceRoles": null,
   "residency": null,
@@ -62,6 +58,6 @@
       "source": "open"
     }
   },
-  "taskKillGracePeriodSeconds": null,
+  "taskKillGracePeriodSeconds": 3600,
   "requirePorts": false
 }
