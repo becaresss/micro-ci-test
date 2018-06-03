@@ -28,7 +28,7 @@
   "maxLaunchDelaySeconds": 3600,
   "container": {
     "docker": {
-      "image": "stratioci/micro-ci-test:1.0.0-SNAPSHOT",
+      "image": "csfstratio/micro-ci-test",
       "forcePullImage": true,
       "privileged": false,
       "network": "HOST"
