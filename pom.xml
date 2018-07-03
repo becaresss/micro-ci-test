@@ -102,12 +102,12 @@
   <distributionManagement>
     <repository>
       <id>nexus</id>
-      <name>SaaS Nexus Releases</name>
+      <name>Bawag Nexus Releases</name>
       <url>http://10.190.0.150:12555/repository/maven-releases/</url>
     </repository>
     <snapshotRepository>
       <id>nexus</id>
-      <name>SaaS Nexus Snapshots</name>
+      <name>Bawag Nexus Snapshots</name>
       <url>http://10.190.0.150:12555/repository/maven-snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
