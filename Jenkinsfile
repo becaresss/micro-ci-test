@@ -13,7 +13,6 @@ stage('build') {
 
 stage('build docker image') {
     node {
-          env.DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'     
           mvn "clean package docker:build -DskipTests"
     }
 }
@@ -122,7 +121,7 @@ def mvn(String goals) {
     def mvnHome = tool "Maven-3.3.9"
     def javaHome = tool "JDK1.8.0_102"
 
-    withEnv(["JAVA_HOME=${javaHome}", "PATH+MAVEN=${mvnHome}/bin", "DOCKER_OPTS=-H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock"]) {
+    withEnv(["JAVA_HOME=${javaHome}", "PATH+MAVEN=${mvnHome}/bin"]) {
         sh "mvn -B ${goals}"
     }
 }
