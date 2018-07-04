@@ -2,6 +2,10 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
+ environment {
+        DOCKER_HOST = 'unix:///var/run/docker.sock'
+    }
+
 stage('build') {
     node {
         checkout scm
