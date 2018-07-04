@@ -14,7 +14,7 @@ stage('build') {
 stage('build docker image') {
     node {
           //mvn "clean package docker:build -DskipTests"
-        sh "systemctl restart docker.service"
+        sh "/etc/init.d/docker restart"
         sh "docker build -t micro-ci-test:1.0.0-SNAPSHOT ."
     }
 }
