@@ -6,7 +6,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.stratio.aip</groupId>
-  <artifactId>micro-ci-test</artifactId>
+
+
+  <artifactId>micro-ci-test</artifactId>    
   <version>1.0.0-SNAPSHOT</version>
 
   <parent>
@@ -43,6 +45,7 @@
     <project.scm.id>github</project.scm.id>
     <sonar.coverage.exclusions>**/*Application.*</sonar.coverage.exclusions>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jgitflow.maven.plugin.version>1.0-m4.3</jgitflow.maven.plugin.version>
   </properties>
 
 
@@ -94,19 +97,58 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.4.13</version>
+                <configuration>
+                    <imageName>${project.artifactId}</imageName>
+                    <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
+                    <imageTags>
+                        <imageTag>${project.version}</imageTag>
+                    </imageTags>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <version>${jgitflow.maven.plugin.version}</version>
+                <configuration>
+                    <pushFeatures>true</pushFeatures>
+                    <pushHotfixes>true</pushHotfixes>
+                    <pushReleases>true</pushReleases>
+                    <enableSshAgent>true</enableSshAgent>
+                    <noDeploy>true</noDeploy>
+                    <flowInitContext>
+                        <masterBranchName>master</masterBranchName>
+                        <developBranchName>develop</developBranchName>
+                        <featureBranchPrefix>feature/</featureBranchPrefix>
+                        <releaseBranchPrefix>release/</releaseBranchPrefix>
+                        <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
+                        <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
+                    </flowInitContext>
+                </configuration>
+            </plugin>
     </plugins>
   </build>
 
   <distributionManagement>
     <repository>
       <id>nexus</id>
-      <name>SaaS Nexus Releases</name>
-      <url>http://10.80.0.5:12555/repository/maven-releases</url>
+      <name>Bawag Nexus Releases</name>
+      <url>http://10.190.0.150:12555/repository/releases/</url>
     </repository>
     <snapshotRepository>
       <id>nexus</id>
-      <name>SaaS Nexus Snapshots</name>
-      <url>http://10.80.0.5:12555/repository/maven-snapshots</url>
+      <name>Bawag Nexus Snapshots</name>
+      <url>http://10.190.0.150:12555/repository/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
 
