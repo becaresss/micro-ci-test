@@ -14,7 +14,7 @@ stage('build') {
 stage('build docker image') {
     node {
           //mvn "clean package docker:build -DskipTests"
-        sh "sudo docker build src/main/docker -t micro-ci-test"
+        sh "docker build -t micro-ci-test:1.0.0-SNAPSHOT ."
     }
 }
 
