@@ -104,7 +104,6 @@
                 <configuration>
                     <imageName>${project.artifactId}</imageName>
                     <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
-                    <dockerHost>http://localhost:2375</dockerHost>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
                     </imageTags>
