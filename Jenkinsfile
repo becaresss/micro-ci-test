@@ -2,10 +2,6 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
- environment {
-        DOCKER_HOST = 'unix:///var/run/docker.sock'
-    }
-
 stage('build') {
     node {
         checkout scm
@@ -17,7 +13,8 @@ stage('build') {
 
 stage('build docker image') {
     node {
-        mvn "clean package docker:build -DskipTests"
+          env.DOCKER_OPTS = '-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock'     
+          mvn "clean package docker:build -DskipTests"
     }
 }
 
