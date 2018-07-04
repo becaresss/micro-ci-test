@@ -104,7 +104,7 @@
                 <configuration>
                     <imageName>${project.artifactId}</imageName>
                     <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
-                    <dockerHost>unix:///var/run/docker.sock</dockerHost>
+                    <dockerHost>tcp://0.0.0.0:2375</dockerHost>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
                     </imageTags>
