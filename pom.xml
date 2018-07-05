@@ -134,6 +134,10 @@
                         <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
                         <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
                     </flowInitContext>
+                  
+                    <username>ahernandez-stratio</username>
+                    <password>Azrael_01</password>
+    
                 </configuration>
             </plugin>
     </plugins>
