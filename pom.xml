@@ -102,8 +102,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.4.13</version>
                 <configuration>
-                    <imageName>microci</imageName>
-                  <dockerHost>unix://localhost:2375</dockerHost>
+                    <imageName>bootstrap.stratio.bawag.com:5000/${project.artifactId}</imageName>
                     <dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
