@@ -13,8 +13,8 @@ stage('build') {
 
 stage('build docker image') {
     node {
-        //mvn "clean package docker:build -DskipTests"
-        sh "docker build src/main/docker -t micro-ci-test"
+        mvn "clean package docker:build -DskipTests"
+        //sh "docker build src/main/docker -t micro-ci-test"
     }
 }
 
