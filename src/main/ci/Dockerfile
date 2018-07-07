@@ -1,4 +1,4 @@
-FROM qa.stratio.com/stratio/java-microservice-dockerbase:1.0.0
+FROM csfstratio/dockerbase
 
 VOLUME /tmp
 
