@@ -1,7 +1,7 @@
 {
 
   "volumes": null,
-  "id": "/micro-ci-test",
+  "id": "/${project.artifactId}",
   "cmd": null,
   "args": null,
   "user": null,
@@ -24,7 +24,7 @@
   "maxLaunchDelaySeconds": 3600,
   "container": {
     "docker": {
-      "image": "csfstratio/micro-ci-test:1.0.0-SNAPSHOT",
+      "image": "bootstrap.stratio.bawag.com:5000/${project.artifactId}",
       "forcePullImage": true,
       "privileged": false,
       "network": "HOST"
@@ -49,7 +49,7 @@
   },
   "labels": {
     "HAPROXY_GROUP": "external",
-    "HAPROXY_0_PORT": "50505"
+    "HAPROXY_0_PORT": "60000"
   },
   "acceptedResourceRoles": null,
   "residency": null,
