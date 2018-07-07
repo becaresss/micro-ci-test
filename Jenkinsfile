@@ -7,7 +7,7 @@ stage('build & unit tests & nexus & sonar') {
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-        mvn "clean deploy sonar:sonar"
+        mvn "clean deploy sonar:sonar --settings /opt/settings.xml"
     }
 }
 
