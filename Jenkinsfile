@@ -148,7 +148,8 @@ def executeTests(String branch_deployment_environment) {
 def deployArtifact(String branch_deployment_environment) {
     
     withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branch_deployment_environment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
-                     string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL')]) {
+                     string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
+                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
 
                     sh "echo Deploying to ${branch_deployment_environment}"
                     sh "/opt/dcos_deploy.sh"
