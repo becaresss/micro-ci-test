@@ -26,6 +26,7 @@ if (branch_deployment_environment) {
     stage('deploy artifact to DC/OS') {
 
         if (branch_deployment_environment == "prod") {
+
             timeout(time: 1, unit: 'DAYS') {
                 input "Do you want to deploy to production?"
             }
