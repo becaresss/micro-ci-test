@@ -2,7 +2,7 @@ FROM csfstratio/dockerbase
 
 VOLUME /tmp
 
-ADD target/${project.artifactId}-${project.version}.jar app.jar
+ADD target/micro-ci-test-1.0.1.jar app.jar
 
 ADD entrypoint.sh entrypoint.sh
 
