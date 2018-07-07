@@ -61,7 +61,7 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>/</directory>
+                                    <directory>src/main/ci</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
