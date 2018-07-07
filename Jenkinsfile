@@ -2,12 +2,12 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
-stage('build') {
+stage('build & unit tests & nexus & sonar') {
     node {
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-        mvn "clean verify"
+        mvn "clean deploy sonar:sonar"
     }
 }
 
@@ -23,20 +23,29 @@ if (branch_deployment_environment) {
         }
     }
     
-    stage('deploy artifact') {
+    stage('deploy artifact to DC/OS') {
+
+        if (branch_deployment_environment == "prod") {
+            timeout(time: 1, unit: 'DAYS') {
+                input "Do you want to deploy to production?"
+            }
+        }
         
         node {
             deployArtifact branch_deployment_environment      
         }
     }
+
+    if (branch_deployment_environment != "prod") {
     
 
-    stage('perform ${branch_deployment_environment} tests') {
-    
-        node {
-            executeTests branch_deployment_environment
+        stage('perform tests') {
+        
+            node {
+                executeTests branch_deployment_environment
+            }
         }
-    } 
+    }
     
 
     if (branch_type == "dev") {
@@ -57,6 +66,7 @@ if (branch_deployment_environment) {
         branch_deployment_environment = "uat"
         
         stage('deploy release candidate to UAT') {
+            
             timeout(time: 1, unit: 'HOURS') {
                 input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
             }
@@ -66,12 +76,14 @@ if (branch_deployment_environment) {
         }
         
         stage('perform acceptation tests') {
+            
             node {
                 executeTests branch_deployment_environment
             }
         }
         
         stage('end release') {
+            
             node {
                 mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
@@ -79,7 +91,9 @@ if (branch_deployment_environment) {
     }
 
     else if (branch_type == "hotfix") {
+        
         stage('finish hotfix') {
+            
             timeout(time: 1, unit: 'HOURS') {
                 input "Is the hotfix finished?"
             }
@@ -122,6 +136,8 @@ def get_branch_deployment_environment(String branch_type) {
         return "dev"
     } else if (branch_type == "release") {
         return "syt"
+    } else if (branch_type == "master") {
+        return "prod"
     } else {
         return null;
     }
