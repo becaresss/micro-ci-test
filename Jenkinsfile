@@ -7,7 +7,7 @@ stage('build & unit tests & nexus & sonar') {
         checkout scm
         def v = version()
         currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-        mvn "clean deploy sonar:sonar"
+        mvn "clean deploy sonar:sonar --settings /opt/settings.xml"
     }
 }
 
@@ -26,6 +26,7 @@ if (branch_deployment_environment) {
     stage('deploy artifact to DC/OS') {
 
         if (branch_deployment_environment == "prod") {
+
             timeout(time: 1, unit: 'DAYS') {
                 input "Do you want to deploy to production?"
             }
@@ -59,7 +60,9 @@ if (branch_deployment_environment) {
                 mvn("jgitflow:release-start")
             }
         }
-    } else if (branch_type == "release") {
+    }
+
+    else if (branch_type == "release") {
 
         branch_deployment_environment = "uat"
 
@@ -86,7 +89,9 @@ if (branch_deployment_environment) {
                 mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
-    } else if (branch_type == "hotfix") {
+    }
+
+    else if (branch_type == "hotfix") {
 
         stage('finish hotfix') {
 
@@ -99,6 +104,8 @@ if (branch_deployment_environment) {
         }
     }
 }
+
+
 
 // Utility functions
 def get_branch_type(String branch_name) {
@@ -159,7 +166,7 @@ def deployArtifact(String branch_deployment_environment) {
 
     withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branch_deployment_environment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
                      string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
-                     string(credentialsId: 'marathonApiUrl_' + branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
+                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
 
         sh "echo Deploying to ${branch_deployment_environment}"
         sh "/opt/dcos_deploy.sh"
