@@ -16,12 +16,6 @@
         <version>1.5.9.RELEASE</version>
     </parent>
 
-    <scm>
-        <connection>scm:git:https://github.com/ahernandez-stratio/micro-ci-test.git</connection>
-        <url>https://github.com/ahernandez-stratio/micro-ci-test</url>
-        <tag>HEAD</tag>
-    </scm>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -41,7 +35,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <project.scm.id>github</project.scm.id>
         <sonar.coverage.exclusions>**/*Application.*</sonar.coverage.exclusions>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jgitflow.maven.plugin.version>1.0-m4.3</jgitflow.maven.plugin.version>
