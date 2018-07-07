@@ -15,14 +15,14 @@ def branch_type = get_branch_type "${env.BRANCH_NAME}"
 def branch_deployment_environment = get_branch_deployment_environment branch_type
 
 if (branch_deployment_environment) {
-        
+
     stage('build docker image') {
-        
+
         node {
             mvn "clean package docker:build -DpushImage -DskipTests"
         }
     }
-    
+
     stage('deploy artifact to DC/OS') {
 
         if (branch_deployment_environment == "prod") {
@@ -30,26 +30,26 @@ if (branch_deployment_environment) {
                 input "Do you want to deploy to production?"
             }
         }
-        
+
         node {
-            deployArtifact branch_deployment_environment      
+            deployArtifact branch_deployment_environment
         }
     }
 
     if (branch_deployment_environment != "prod") {
-    
+
 
         stage('perform tests') {
-        
+
             node {
                 executeTests branch_deployment_environment
             }
         }
     }
-    
+
 
     if (branch_type == "dev") {
-        
+
         stage('start release') {
 
             timeout(time: 1, unit: 'HOURS') {
@@ -59,14 +59,12 @@ if (branch_deployment_environment) {
                 mvn("jgitflow:release-start")
             }
         }
-    }
-
-    else if (branch_type == "release") {
+    } else if (branch_type == "release") {
 
         branch_deployment_environment = "uat"
-        
+
         stage('deploy release candidate to UAT') {
-            
+
             timeout(time: 1, unit: 'HOURS') {
                 input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
             }
@@ -74,26 +72,24 @@ if (branch_deployment_environment) {
                 deployArtifact branch_deployment_environment
             }
         }
-        
+
         stage('perform acceptation tests') {
-            
+
             node {
                 executeTests branch_deployment_environment
             }
         }
-        
+
         stage('end release') {
-            
+
             node {
                 mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
-    }
+    } else if (branch_type == "hotfix") {
 
-    else if (branch_type == "hotfix") {
-        
         stage('finish hotfix') {
-            
+
             timeout(time: 1, unit: 'HOURS') {
                 input "Is the hotfix finished?"
             }
@@ -101,20 +97,18 @@ if (branch_deployment_environment) {
                 mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
-    }    
+    }
 }
-
-
 
 // Utility functions
 def get_branch_type(String branch_name) {
-    
+
     def dev_pattern = ".*develop"
     def release_pattern = ".*release/.*"
     def feature_pattern = ".*feature/.*"
     def hotfix_pattern = ".*hotfix/.*"
     def master_pattern = ".*master"
-    
+
     if (branch_name =~ dev_pattern) {
         return "dev"
     } else if (branch_name =~ release_pattern) {
@@ -131,7 +125,7 @@ def get_branch_type(String branch_name) {
 }
 
 def get_branch_deployment_environment(String branch_type) {
-    
+
     if (branch_type == "dev") {
         return "dev"
     } else if (branch_type == "release") {
@@ -162,12 +156,12 @@ def executeTests(String branch_deployment_environment) {
 }
 
 def deployArtifact(String branch_deployment_environment) {
-    
+
     withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branch_deployment_environment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
                      string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
-                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
+                     string(credentialsId: 'marathonApiUrl_' + branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
 
-                    sh "echo Deploying to ${branch_deployment_environment}"
-                    sh "/opt/dcos_deploy.sh"
+        sh "echo Deploying to ${branch_deployment_environment}"
+        sh "/opt/dcos_deploy.sh"
     }
 }
