@@ -2,7 +2,7 @@ FROM csfstratio/dockerbase
 
 VOLUME /tmp
 
-ADD target/micro-ci-test-1.0.1-SNAPSHOT.jar micro-ci-test.jar
+ADD target/micro-ci-test-${project.version}.jar micro-ci-test.jar
 
 ADD entrypoint.sh entrypoint.sh
 
