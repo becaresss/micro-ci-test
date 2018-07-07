@@ -118,7 +118,7 @@
                     </imageTags>
                     <resources>
                         <resource>
-                            <targetPath>/</targetPath>
+                            <targetPath>src/main/ci</targetPath>
                             <directory>${project.build.directory}</directory>
                             <include>${project.build.finalName}.jar</include>
                         </resource>
