@@ -1,7 +1,6 @@
 {
-
   "volumes": null,
-  "id": "/${project.artifactId}",
+  "id": "/@project.artifactId@-${GIT_BRANCH##origin/:}",
   "cmd": null,
   "args": null,
   "user": null,
@@ -24,7 +23,7 @@
   "maxLaunchDelaySeconds": 3600,
   "container": {
     "docker": {
-      "image": "bootstrap.stratio.bawag.com:5000/${project.artifactId}",
+      "image": "@docker.registry.url@/@project.artifactId@:@project.version@",
       "forcePullImage": true,
       "privileged": false,
       "network": "HOST"
@@ -48,8 +47,7 @@
     "maximumOverCapacity": 1
   },
   "labels": {
-    "HAPROXY_GROUP": "external",
-    "HAPROXY_0_PORT": "60000"
+    "HAPROXY_GROUP": "external"
   },
   "acceptedResourceRoles": null,
   "residency": null,

@@ -1,12 +1,8 @@
 FROM csfstratio/dockerbase
 
-ARG artifactId
-
-ARG version
-
 VOLUME /tmp
 
-ADD $artifactId-$version.jar app.jar
+ADD @project.artifactId@-@project.version@.jar app.jar
 
 ADD entrypoint.sh entrypoint.sh
 
