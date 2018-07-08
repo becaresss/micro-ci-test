@@ -1,8 +1,12 @@
 FROM csfstratio/dockerbase
 
+ARG artifactId
+
+ARG version
+
 VOLUME /tmp
 
-ADD target/micro-ci-test-1.0.1.jar app.jar
+ADD $artifactId-$version.jar app.jar
 
 ADD entrypoint.sh entrypoint.sh
 
