@@ -112,8 +112,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker.maven.plugin.version}</version>
                 <configuration>
-                    <registryUrl>${docker.registry.url}</registryUrl>
-                    <imageName>${project.artifactId}</imageName>
+                    <imageName>${docker.registry.url}/${project.artifactId}</imageName>
                     <dockerDirectory>${project.build.directory}/ci</dockerDirectory>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
