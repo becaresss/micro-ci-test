@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.stratio.aip</groupId>
 
 
     <artifactId>micro-ci-test</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -38,6 +37,10 @@
         <sonar.coverage.exclusions>**/*Application.*</sonar.coverage.exclusions>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jgitflow.maven.plugin.version>1.0-m4.3</jgitflow.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.7.5.201505241946</jacoco.maven.plugin.version>
+        <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
+        <docker.maven.plugin.version>0.4.13</docker.maven.plugin.version>
+        <docker.registry.url>bootstrap.stratio.bawag.com:5000</docker.registry.url>
     </properties>
 
 
@@ -49,10 +52,10 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.2</version>
+                <version>${maven.resources.plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>filter-dockerfile</id>
+                        <id>filter-ci-resources</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -61,7 +64,7 @@
                             <outputDirectory>${project.build.directory}/ci</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/main/ci</directory>
+                                    <directory>src/main/ci</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
@@ -72,7 +75,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
+                <version>${jacoco.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -109,10 +112,11 @@
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.4.13</version>
+                <version>${docker.maven.plugin.version}</version>
                 <configuration>
-                    <imageName>bootstrap.stratio.bawag.com:5000/${project.artifactId}</imageName>
-                    <dockerDirectory>src/main/ci</dockerDirectory>
+                    <registryUrl>${docker.registry.url}</registryUrl>
+                    <imageName>${project.artifactId}</imageName>
+                    <dockerDirectory>${project.build.directory}/ci</dockerDirectory>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
                     </imageTags>
@@ -147,10 +151,8 @@
                         <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
                         <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
                     </flowInitContext>
-
                     <username>${env.GIT_USER}</username>
                     <password>${env.GIT_PASSWORD}</password>
-
                 </configuration>
             </plugin>
         </plugins>
@@ -160,13 +162,11 @@
         <repository>
             <id>nexus</id>
             <name>Bawag Nexus Releases</name>
-            <!--<url>http://10.190.0.150:12555/repository/releases/</url>-->
             <url>${env.NEXUS_RELEASES_URL}</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Bawag Nexus Snapshots</name>
-            <!--<url>http://10.190.0.150:12555/repository/snapshots/</url>-->
             <url>${env.NEXUS_SNAPSHOTS_URL}</url>
         </snapshotRepository>
     </distributionManagement>
