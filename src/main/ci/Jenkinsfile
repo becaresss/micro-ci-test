@@ -2,6 +2,8 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
+def exit = false;
+
 stage('build & unit tests & nexus & sonar') {
 
     node {
@@ -12,11 +14,15 @@ stage('build & unit tests & nexus & sonar') {
             currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
             mvn "clean deploy sonar:sonar --settings /opt/settings.xml"
         } else {
-            echo "ci-skip step reached!. Stopping..."
-            currentBuild.result = 'SUCCESS'
-            return
+            exit = true
         }
     }
+}
+
+if (exit) {
+    echo "ci-skip step reached!. Mark job to be finished successfully..."
+    currentBuild.result = 'SUCCESS'
+    return
 }
 
 def branch_type = get_branch_type "${env.BRANCH_NAME}"
