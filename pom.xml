@@ -8,7 +8,7 @@
 
     <artifactId>micro-ci-test</artifactId>
 
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
 
 
     <parent>
@@ -33,17 +33,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <properties>
-        <java.version>1.8</java.version>
-        <sonar.coverage.exclusions>**/*Application.*</sonar.coverage.exclusions>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jgitflow.maven.plugin.version>1.0-m4.3</jgitflow.maven.plugin.version>
-        <jacoco.maven.plugin.version>0.7.5.201505241946</jacoco.maven.plugin.version>
-        <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
-        <docker.maven.plugin.version>0.4.13</docker.maven.plugin.version>
-        <docker.registry.url>bootstrap.stratio.bawag.com:5000</docker.registry.url>
-    </properties>
 
     <properties>
         <java.version>1.8</java.version>
@@ -136,10 +125,6 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
-                    <buildArgs>
-                        <artifactId>${project.artifactId}</artifactId>
-                        <version>${project.version}</version>
-                    </buildArgs>
                 </configuration>
             </plugin>
             <plugin>
