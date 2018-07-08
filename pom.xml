@@ -47,28 +47,28 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <!--<plugin>-->
-                <!--<artifactId>maven-resources-plugin</artifactId>-->
-                <!--<version>3.0.2</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>filter-dockerfile</id>-->
-                        <!--<phase>generate-resources</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>copy-resources</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<outputDirectory>${project.build.directory}</outputDirectory>-->
-                            <!--<resources>-->
-                                <!--<resource>-->
-                                    <!--<directory>${project.basedir}/src/main/ci</directory>-->
-                                    <!--<filtering>true</filtering>-->
-                                <!--</resource>-->
-                            <!--</resources>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <id>filter-dockerfile</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/ci</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/ci</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -112,7 +112,7 @@
                 <version>0.4.13</version>
                 <configuration>
                     <imageName>bootstrap.stratio.bawag.com:5000/${project.artifactId}</imageName>
-                    <dockerDirectory>${project.build.directory}</dockerDirectory>
+                    <dockerDirectory>src/main/ci</dockerDirectory>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>
                     </imageTags>
@@ -123,6 +123,10 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
+                    <buildArgs>
+                        <artifactId>${project.artifactId}</artifactId>
+                        <version>${project.version}</version>
+                    </buildArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -144,8 +148,8 @@
                         <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
                     </flowInitContext>
 
-                    <username>ahernandez-stratio</username>
-                    <password>Azrael_01</password>
+                    <username>${env.GIT_USER}</username>
+                    <password>${env.GIT_PASSWORD}</password>
 
                 </configuration>
             </plugin>
@@ -156,12 +160,14 @@
         <repository>
             <id>nexus</id>
             <name>Bawag Nexus Releases</name>
-            <url>http://10.190.0.150:12555/repository/releases/</url>
+            <!--<url>http://10.190.0.150:12555/repository/releases/</url>-->
+            <url>${env.NEXUS_RELEASES_URL}</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Bawag Nexus Snapshots</name>
-            <url>http://10.190.0.150:12555/repository/snapshots/</url>
+            <!--<url>http://10.190.0.150:12555/repository/snapshots/</url>-->
+            <url>${env.NEXUS_SNAPSHOTS_URL}</url>
         </snapshotRepository>
     </distributionManagement>
 
