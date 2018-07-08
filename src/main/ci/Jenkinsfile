@@ -173,6 +173,11 @@ def version() {
     return matcher ? matcher[0][1] : null
 }
 
+def artifactId() {
+    def matcher = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
+    return matcher ? matcher[0][1] : null
+}
+
 def executeTests(String branch_deployment_environment) {
     //TODO: Pass tests!
 }
@@ -183,7 +188,12 @@ def deployArtifact(String branch_deployment_environment) {
                      string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
                      string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
 
-                    sh "echo Deploying to ${branch_deployment_environment}"
-                    sh "/opt/dcos_deploy.sh"
+
+        def artifactId = artifactId()
+
+        withEnv(["ARTIFACT_ID=${artifactId}"]) {
+            sh "echo Deploying to ${branch_deployment_environment}"
+            sh "/opt/dcos_deploy.sh"
+        }
     }
 }
