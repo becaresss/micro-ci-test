@@ -149,8 +149,10 @@ def mvn(String goals) {
     def javaHome = tool "JDK1.8.0_102"
 
     withCredentials([usernamePassword(credentialsId: 'githubuser', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
-                         string(credentialsId: 'nexusReleasesUrl', variable: 'NEXUS_RELEASES_URL'),
-                         string(credentialsId: 'nexusSnapshotsUrl', variable: 'NEXUS_SNAPSHOTS_URL')]) {
+                     string(credentialsId: 'nexusReleasesUrl', variable: 'NEXUS_RELEASES_URL'),
+                     string(credentialsId: 'nexusSnapshotsUrl', variable: 'NEXUS_SNAPSHOTS_URL'),
+                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD'),
+                     string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
 
         withEnv(["JAVA_HOME=${javaHome}", "PATH+MAVEN=${mvnHome}/bin"]) {
             sh "mvn -B ${goals}"
@@ -171,9 +173,7 @@ def deployArtifact(String branch_deployment_environment) {
 
     withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branch_deployment_environment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
                      string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
-                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL'),
-                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD'),
-                     string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
+                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
 
                     sh "echo Deploying to ${branch_deployment_environment}"
                     sh "/opt/dcos_deploy.sh"
