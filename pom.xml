@@ -4,12 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.stratio.aip</groupId>
-
-
     <artifactId>micro-ci-test</artifactId>
-
     <version>1.0.3-SNAPSHOT</version>
-
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -139,7 +135,7 @@
                     <flowInitContext>
                         <masterBranchName>master</masterBranchName>
                         <developBranchName>develop</developBranchName>
-                        <featureBranchPrefix>feature/</featureBranchPrefix>
+                        <featkureBranchPrefix>feature/</featkureBranchPrefix>
                         <releaseBranchPrefix>release/</releaseBranchPrefix>
                         <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
                         <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
