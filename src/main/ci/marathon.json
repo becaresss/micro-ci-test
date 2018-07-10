@@ -1,6 +1,6 @@
 {
   "volumes": null,
-  "id": "/@project.artifactId@-${GIT_BRANCH##origin/:}",
+  "id": "/@project.artifactId@",
   "cmd": null,
   "args": null,
   "user": null,
@@ -56,6 +56,6 @@
       "source": "open"
     }
   },
-  "taskKillGracePeriodSeconds": 3600,
+  "taskKillGracePeriodSeconds": null,
   "requirePorts": false
 }

@@ -2,117 +2,111 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
-def exit = false;
+def skipCi = false
 
 stage('build & unit tests & nexus & sonar') {
 
-    node {
+    node('jenkins-slave') {
         checkout scm
         result = sh (script: "git log -1 | grep 'updating poms for'", returnStatus: true)
-        if (result != 0) {
-            def v = version()
-            currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-            mvn "clean deploy sonar:sonar --settings /opt/settings.xml"
-        } else {
-            exit = true
-        }
+        skipCi = result != 0 ? build() : true
     }
 }
 
-if (exit) {
+if (skipCi) {
     echo "ci-skip step reached!. Mark job to be finished successfully..."
     currentBuild.result = 'SUCCESS'
     return
 }
 
-def branch_type = get_branch_type "${env.BRANCH_NAME}"
-def branch_deployment_environment = get_branch_deployment_environment branch_type
+def branchType = getBranchType "${env.BRANCH_NAME}"
+def branchDeploymentEnvironment = getBranchDeploymentEnvironment branchType
 
-if (branch_deployment_environment) {
+if (branchDeploymentEnvironment) {
 
     stage('build docker image') {
 
-        node {
+        node('jenkins-slave') {
             mvn "clean package docker:build -DpushImage -DskipTests"
         }
     }
 
     stage('deploy artifact to DC/OS') {
 
-        if (branch_deployment_environment == "prod") {
+        if (branchDeploymentEnvironment == "prod") {
 
             timeout(time: 1, unit: 'DAYS') {
                 input "Do you want to deploy to production?"
             }
         }
 
-        node {
-            deployArtifact branch_deployment_environment
+        node('jenkins-slave') {
+            deployArtifact branchDeploymentEnvironment
         }
     }
 
-    if (branch_deployment_environment != "prod") {
+    if (branchDeploymentEnvironment != "prod") {
 
 
         stage('perform tests') {
 
-            node {
-                executeTests branch_deployment_environment
+            node('jenkins-slave') {
+                executeTests branchDeploymentEnvironment
             }
         }
     }
 
 
-    if (branch_type == "dev") {
+    if (branchType == "dev") {
 
         stage('start release') {
 
             timeout(time: 1, unit: 'HOURS') {
                 input "Do you want to prepare a release process?"
             }
-            node {
+            node('jenkins-slave') {
                 mvn("jgitflow:release-start")
             }
         }
     }
 
-    else if (branch_type == "release") {
+    else if (branchType == "release") {
 
-        branch_deployment_environment = "uat"
+        branchDeploymentEnvironment = "uat"
 
         stage('deploy release candidate to UAT') {
 
             timeout(time: 1, unit: 'HOURS') {
                 input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
             }
-            node {
-                deployArtifact branch_deployment_environment
+            node('jenkins-slave') {
+                deployArtifact branchDeploymentEnvironment
             }
         }
 
         stage('perform acceptation tests') {
 
-            node {
-                executeTests branch_deployment_environment
+            node('jenkins-slave') {
+                executeTests branchDeploymentEnvironment
             }
         }
 
         stage('end release') {
 
-            node {
+            node('jenkins-slave') {
                 mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
     }
 
-    else if (branch_type == "hotfix") {
+    else if (branchType == "hotfix") {
 
         stage('finish hotfix') {
 
             timeout(time: 1, unit: 'HOURS') {
                 input "Is the hotfix finished?"
             }
-            node {
+            node('jenkins-slave') {
                 mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
@@ -121,40 +115,39 @@ if (branch_deployment_environment) {
 
 
 
-// Utility functions
-def get_branch_type(String branch_name) {
+def getBranchType(String branchName) {
 
-    def dev_pattern = ".*develop"
-    def release_pattern = ".*release/.*"
-    def feature_pattern = ".*feature/.*"
-    def hotfix_pattern = ".*hotfix/.*"
-    def master_pattern = ".*master"
+    def devPattern = ".*develop"
+    def releasePattern = ".*release/.*"
+    def featurePattern = ".*feature/.*"
+    def hotfixPattern = ".*hotfix/.*"
+    def masterPattern = ".*master"
 
-    if (branch_name =~ dev_pattern) {
+    if (branchName =~ devPattern) {
         return "dev"
-    } else if (branch_name =~ release_pattern) {
+    } else if (branchName =~ releasePattern) {
         return "release"
-    } else if (branch_name =~ master_pattern) {
+    } else if (branchName =~ masterPattern) {
         return "master"
-    } else if (branch_name =~ feature_pattern) {
+    } else if (branchName =~ featurePattern) {
         return "feature"
-    } else if (branch_name =~ hotfix_pattern) {
+    } else if (branchName =~ hotfixPattern) {
         return "hotfix"
     } else {
-        return null;
+        return null
     }
 }
 
-def get_branch_deployment_environment(String branch_type) {
+def getBranchDeploymentEnvironment(String branchType) {
 
-    if (branch_type == "dev") {
+    if (branchType == "dev") {
         return "dev"
-    } else if (branch_type == "release") {
+    } else if (branchType == "release") {
         return "syt"
-    } else if (branch_type == "master") {
+    } else if (branchType == "master") {
         return "prod"
     } else {
-        return null;
+        return null
     }
 }
 
@@ -184,21 +177,47 @@ def artifactId() {
     return matcher ? matcher[0][1] : null
 }
 
-def executeTests(String branch_deployment_environment) {
-    //TODO: Pass tests!
+def build() {
+    def v = version()
+    currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
+    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar --settings /opt/settings.xml"
+    return false
 }
 
-def deployArtifact(String branch_deployment_environment) {
 
-    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branch_deployment_environment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
-                     string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
-                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
+def executeTests(String branchDeploymentEnvironment) {
+
+    switch (branchDeploymentEnvironment) {
+
+        case "dev":
+            //TODO: Check which tests should be performed here!
+            //Executing integration tests...
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
+            break
+        case "syt":
+            //Executing performance tests...
+            mvn "clean verify -DskipUTs=true -DskipITs=true -DskipPTs=false -Dremote.service.pt.host=${TASK_HOST} -Dremote.service.pt.port=${TASK_PORT}"
+            break
+        case "uat":
+            //Executing integration tests...
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
+            break
+        default:
+            break
+    }
+}
+
+def deployArtifact(String branchDeploymentEnvironment) {
+
+    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branchDeploymentEnvironment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
+                     string(credentialsId: 'dcosLoginUrl_' + branchDeploymentEnvironment, variable: 'DCOS_LOGIN_URL'),
+                     string(credentialsId: 'marathonApiUrl_'+ branchDeploymentEnvironment, variable: 'MARATHON_API_URL')]) {
 
 
         def artifactId = artifactId()
 
         withEnv(["ARTIFACT_ID=${artifactId}"]) {
-            sh "echo Deploying to ${branch_deployment_environment}"
+            sh "echo Deploying to ${branchDeploymentEnvironment}"
             sh "/opt/dcos_deploy.sh"
         }
     }
