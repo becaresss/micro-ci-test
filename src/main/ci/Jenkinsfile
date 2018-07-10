@@ -189,15 +189,15 @@ def executeTests(String branchDeploymentEnvironment) {
         case "dev":
             //TODO: Check which tests should be performed here!
             //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://10.190.0.150:10116"
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://bootstrap.stratio.bawag.com:10116"
             break
         case "syt":
             //Executing performance tests...
-            mvn "clean verify -DskipUTs=true -DskipITs=true -DskipPTs=false -Dremote.service.pt.host=10.190.0.150 -Dremote.service.pt.port=10116"
+            mvn "clean verify -DskipUTs=true -DskipITs=true -DskipPTs=false -Dremote.service.pt.host=bootstrap.stratio.bawag.com -Dremote.service.pt.port=10116"
             break
         case "uat":
             //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://10.190.0.150:10116"
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://bootstrap.stratio.bawag.com:10116"
             break
         default:
             break
