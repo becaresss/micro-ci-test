@@ -182,6 +182,8 @@ def build() {
 
 def executeTests(String branchDeploymentEnvironment) {
 
+    def artifactId = artifactId()
+
     switch (branchDeploymentEnvironment) {
 
         case "dev":
