@@ -189,7 +189,7 @@ def executeTests(String branchDeploymentEnvironment) {
         case "dev":
             //TODO: Check which tests should be performed here!
             //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://bootstrap.stratio.bawag.com:10116"
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=${artifactId}.marathon.l4lb.thisdcos.directory:10116"
             break
         case "syt":
             //Executing performance tests...
