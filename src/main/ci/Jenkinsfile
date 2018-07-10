@@ -4,11 +4,9 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 
 def skipCi = false
 
-agent { label 'mesos' }
-
 stage('build & unit tests & nexus & sonar') {
 
-    node {
+    node('jenkins-slave') {
         checkout scm
         result = sh (script: "git log -1 | grep 'updating poms for'", returnStatus: true)
         skipCi = result != 0 ? build() : true
@@ -28,7 +26,7 @@ if (branchDeploymentEnvironment) {
 
     stage('build docker image') {
 
-        node {
+        node('jenkins-slave') {
             mvn "clean package docker:build -DpushImage -DskipTests"
         }
     }
@@ -42,7 +40,7 @@ if (branchDeploymentEnvironment) {
             }
         }
 
-        node {
+        node('jenkins-slave') {
             deployArtifact branchDeploymentEnvironment
         }
     }
@@ -52,7 +50,7 @@ if (branchDeploymentEnvironment) {
 
         stage('perform tests') {
 
-            node {
+            node('jenkins-slave') {
                 executeTests branchDeploymentEnvironment
             }
         }
@@ -66,7 +64,7 @@ if (branchDeploymentEnvironment) {
             timeout(time: 1, unit: 'HOURS') {
                 input "Do you want to prepare a release process?"
             }
-            node {
+            node('jenkins-slave') {
                 mvn("jgitflow:release-start")
             }
         }
@@ -81,21 +79,21 @@ if (branchDeploymentEnvironment) {
             timeout(time: 1, unit: 'HOURS') {
                 input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
             }
-            node {
+            node('jenkins-slave') {
                 deployArtifact branchDeploymentEnvironment
             }
         }
 
         stage('perform acceptation tests') {
 
-            node {
+            node('jenkins-slave') {
                 executeTests branchDeploymentEnvironment
             }
         }
 
         stage('end release') {
 
-            node {
+            node('jenkins-slave') {
                 mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
@@ -108,7 +106,7 @@ if (branchDeploymentEnvironment) {
             timeout(time: 1, unit: 'HOURS') {
                 input "Is the hotfix finished?"
             }
-            node {
+            node('jenkins-slave') {
                 mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
@@ -193,16 +191,16 @@ def executeTests(String branchDeploymentEnvironment) {
 
         case "dev":
             //TODO: Check which tests should be performed here!
+            //Executing integration tests...
+            mvn "clean verify -DskipUTs=true -DskipPTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
             break
         case "syt":
             //Executing performance tests...
-            //TODO: Pass maven arguments with URL and port of running service (instead of localhost:8080) to be used in performance tests
-            mvn "clean verify -DskipUTs=true -DskipITs=true -Dremote.service.pt.host=localhost -Dremote.service.pt.port=8080"
+            mvn "clean verify -DskipUTs=true -DskipITs=true -Dremote.service.pt.host=${TASK_HOST} -Dremote.service.pt.port=${TASK_PORT}"
             break
         case "uat":
             //Executing integration tests...
-            //TODO: Pass environment variable with URL of running service (instead of localhost:8080) to be used in integration tests
-            mvn "clean verify -DskipUTs=true -DskipPTs=true -Dremote.service.it.url=http://localhost:8080"
+            mvn "clean verify -DskipUTs=true -DskipPTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
             break
         default:
             break
@@ -220,7 +218,6 @@ def deployArtifact(String branchDeploymentEnvironment) {
 
         withEnv(["ARTIFACT_ID=${artifactId}"]) {
             sh "echo Deploying to ${branchDeploymentEnvironment}"
-            //TODO: Return URL:PORT of running service! Put it in an environment variable to be used at testing phase
             sh "/opt/dcos_deploy.sh"
         }
     }
