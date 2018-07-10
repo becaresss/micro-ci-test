@@ -147,7 +147,7 @@ def getBranchDeploymentEnvironment(String branchType) {
 }
 
 def mvn(String goals) {
-    //def mvnHome = tool "Maven-3.3.9"
+    def mvnHome = tool "Maven-3.3.9"
     //def javaHome = tool "JDK1.8.0_102"
 
     withCredentials([usernamePassword(credentialsId: 'githubuser', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
@@ -156,9 +156,9 @@ def mvn(String goals) {
                      usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD'),
                      string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
 
-        //withEnv(["JAVA_HOME=${javaHome}", "PATH+MAVEN=${mvnHome}/bin"]) {
-        sh "mvn -B ${goals}"
-        //}
+        withEnv(["PATH+MAVEN=${mvnHome}/bin"]) {
+            sh "mvn -B ${goals}"
+        }
     }
 }
 
