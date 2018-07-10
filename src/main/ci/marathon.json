@@ -56,6 +56,6 @@
       "source": "open"
     }
   },
-  "taskKillGracePeriodSeconds": 3600,
+  "taskKillGracePeriodSeconds": null,
   "requirePorts": false
 }
