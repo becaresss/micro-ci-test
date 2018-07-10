@@ -35,9 +35,16 @@ if (branchDeploymentEnvironment) {
 
         if (branchDeploymentEnvironment == "prod") {
 
-            timeout(time: 1, unit: 'DAYS') {
-                input "Do you want to deploy to production?"
+            try {
+                timeout(time: 1, unit: 'DAYS') {
+                    input "Do you want to deploy to production?"
+                }
+            } catch (abort) {
+                echo "Job finished due to ${abort}..."
+                currentBuild.result = 'SUCCESS'
+                return
             }
+
         }
 
         node('jenkins-slave') {
@@ -61,9 +68,17 @@ if (branchDeploymentEnvironment) {
 
         stage('start release') {
 
-            timeout(time: 1, unit: 'HOURS') {
-                input "Do you want to prepare a release process?"
+            try  {
+                timeout(time: 1, unit: 'HOURS') {
+                    input "Do you want to prepare a release process?"
+                }
+
+            } catch (abort) {
+                echo "Job finished due to ${abort}..."
+                currentBuild.result = 'SUCCESS'
+                return
             }
+
             node('jenkins-slave') {
                 mvn("jgitflow:release-start")
             }
@@ -74,9 +89,16 @@ if (branchDeploymentEnvironment) {
 
         stage('deploy release candidate to UAT') {
 
-            timeout(time: 1, unit: 'HOURS') {
-                input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
+            try {
+                timeout(time: 1, unit: 'HOURS') {
+                    input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
+                }
+            } catch (abort) {
+                echo "Job finished due to ${abort}..."
+                currentBuild.result = 'SUCCESS'
+                return
             }
+
             node('jenkins-slave') {
                 deployArtifact branchDeploymentEnvironment
             }
@@ -99,9 +121,16 @@ if (branchDeploymentEnvironment) {
 
         stage('finish hotfix') {
 
-            timeout(time: 1, unit: 'HOURS') {
-                input "Is the hotfix finished?"
+            try {
+                timeout(time: 1, unit: 'HOURS') {
+                    input "Is the hotfix finished?"
+                }
+            } catch (abort) {
+                echo "Job finished due to ${abort}..."
+                currentBuild.result = 'SUCCESS'
+                return
             }
+
             node('jenkins-slave') {
                 mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
