@@ -117,7 +117,6 @@ if (branchDeploymentEnvironment) {
 
 
 
-// Utility functions
 def getBranchType(String branchName) {
 
     def devPattern = ".*develop"
@@ -183,26 +182,45 @@ def artifactId() {
 def build() {
     def v = version()
     currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-    mvn "clean deploy sonar:sonar --settings /opt/settings.xml"
+    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar --settings /opt/settings.xml"
     return false
 }
 
 
-def executeTests(String branch_deployment_environment) {
-    //TODO: Pass tests!
+def executeTests(String branchDeploymentEnvironment) {
+
+    switch (branchDeploymentEnvironment) {
+
+        case "dev":
+            //TODO: Check which tests should be performed here!
+            break
+        case "syt":
+            //Executing performance tests...
+            //TODO: Pass maven arguments with URL and port of running service (instead of localhost:8080) to be used in performance tests
+            mvn "clean verify -DskipUTs=true -DskipITs=true -Dremote.service.pt.host=localhost -Dremote.service.pt.port=8080"
+            break
+        case "uat":
+            //Executing integration tests...
+            //TODO: Pass environment variable with URL of running service (instead of localhost:8080) to be used in integration tests
+            mvn "clean verify -DskipUTs=true -DskipPTs=true -Dremote.service.it.url=http://localhost:8080"
+            break
+        default:
+            break
+    }
 }
 
-def deployArtifact(String branch_deployment_environment) {
+def deployArtifact(String branchDeploymentEnvironment) {
 
-    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branch_deployment_environment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
-                     string(credentialsId: 'dcosLoginUrl_' + branch_deployment_environment, variable: 'DCOS_LOGIN_URL'),
-                     string(credentialsId: 'marathonApiUrl_'+ branch_deployment_environment, variable: 'MARATHON_API_URL')]) {
+    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branchDeploymentEnvironment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
+                     string(credentialsId: 'dcosLoginUrl_' + branchDeploymentEnvironment, variable: 'DCOS_LOGIN_URL'),
+                     string(credentialsId: 'marathonApiUrl_'+ branchDeploymentEnvironment, variable: 'MARATHON_API_URL')]) {
 
 
         def artifactId = artifactId()
 
         withEnv(["ARTIFACT_ID=${artifactId}"]) {
-            sh "echo Deploying to ${branch_deployment_environment}"
+            sh "echo Deploying to ${branchDeploymentEnvironment}"
+            //TODO: Return URL:PORT of running service! Put it in an environment variable to be used at testing phase
             sh "/opt/dcos_deploy.sh"
         }
     }
