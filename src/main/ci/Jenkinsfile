@@ -6,7 +6,7 @@ def skipCi = false
 
 stage('build & unit tests & nexus & sonar') {
 
-    node('jenkins-slave') {
+   node {
         checkout scm
         result = sh (script: "git log -1 | grep 'updating poms for'", returnStatus: true)
         skipCi = result != 0 ? build() : true
@@ -26,7 +26,7 @@ if (branchDeploymentEnvironment) {
 
     stage('build docker image') {
 
-        node('jenkins-slave') {
+       node {
             mvn "clean package docker:build -DpushImage -DskipTests"
         }
     }
@@ -40,7 +40,7 @@ if (branchDeploymentEnvironment) {
             }
         }
 
-        node('jenkins-slave') {
+       node {
             deployArtifact branchDeploymentEnvironment
         }
     }
@@ -50,7 +50,7 @@ if (branchDeploymentEnvironment) {
 
         stage('perform tests') {
 
-            node('jenkins-slave') {
+           node {
                 executeTests branchDeploymentEnvironment
             }
         }
@@ -64,7 +64,7 @@ if (branchDeploymentEnvironment) {
             timeout(time: 1, unit: 'HOURS') {
                 input "Do you want to prepare a release process?"
             }
-            node('jenkins-slave') {
+           node {
                 mvn("jgitflow:release-start")
             }
         }
@@ -79,21 +79,21 @@ if (branchDeploymentEnvironment) {
             timeout(time: 1, unit: 'HOURS') {
                 input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
             }
-            node('jenkins-slave') {
+           node {
                 deployArtifact branchDeploymentEnvironment
             }
         }
 
         stage('perform acceptation tests') {
 
-            node('jenkins-slave') {
+           node {
                 executeTests branchDeploymentEnvironment
             }
         }
 
         stage('end release') {
 
-            node('jenkins-slave') {
+           node {
                 mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
@@ -106,7 +106,7 @@ if (branchDeploymentEnvironment) {
             timeout(time: 1, unit: 'HOURS') {
                 input "Is the hotfix finished?"
             }
-            node('jenkins-slave') {
+           node {
                 mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
             }
         }
