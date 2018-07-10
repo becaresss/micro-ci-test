@@ -5,12 +5,26 @@
   "args": null,
   "user": null,
   "env": {
+    "AS_TRIGGER_MODE": "all",
+    "AS_MIN_INSTANCES": "2",
+    "AS_COOL_DOWN_FACTOR": "3",
+    "AS_MICROSERVICE": "true",
+    "AS_MIN_MEM_PERCENT": "60",
+    "AS_MAX_INSTANCES": "5",
+    "AS_MAX_CPU_TIME": "80",
+    "AS_METRICS_PORT_NAME": "app",
+    "AS_MAX_MEM_PERCENT": "85",
+    "AS_MIN_CPU_TIME": "60",
+    "AS_AUTOSCALE_MULTIPLIER": "1.5",
+    "AS_TRIGGER_NUMBER": "2",
+    "MICROSERVICES_HEAP_MB": "1768",
+    "PORT0": "8080",
     "APPROLE": {
       "secret": "role"
     }
   },
   "instances": 1,
-  "cpus": 1,
+  "cpus": 0.5,
   "mem": 1024,
   "disk": 0,
   "gpus": 0,
@@ -26,18 +40,29 @@
       "image": "@docker.registry.url@/@project.artifactId@:@project.version@",
       "forcePullImage": true,
       "privileged": false,
-      "network": "HOST"
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp",
+          "name": "app",
+          "labels": {
+            "VIP_0": "/@project.artifactId@:8080"
+          }
+        }
+      ],
+      "network": "USER"
     }
   },
   "healthChecks": [
     {
-      "protocol": "HTTP",
-      "path": "/",
+      "protocol": "COMMAND",
+      "command": {
+        "value": "curl -f -X GET http://@project.artifactId@.marathon.l4lb.thisdcos.directory:8080/health"
+      },
       "gracePeriodSeconds": 300,
       "intervalSeconds": 20,
       "timeoutSeconds": 20,
-      "maxConsecutiveFailures": 10,
-      "ignoreHttp1xx": false
+      "maxConsecutiveFailures": 10
     }
   ],
   "readinessChecks": null,
@@ -47,15 +72,19 @@
     "maximumOverCapacity": 1
   },
   "labels": {
-    "HAPROXY_GROUP": "external"
+    "HAPROXY_GROUP": "external",
+    "autoscaler": "bawag",
+    "PROMETHEUS_JOB": "masters"
   },
   "acceptedResourceRoles": null,
+  "ipAddress": {
+    "networkName": "stratio"
+  },
   "residency": null,
   "secrets": {
     "role": {
       "source": "open"
     }
   },
-  "taskKillGracePeriodSeconds": null,
-  "requirePorts": false
+  "taskKillGracePeriodSeconds": null
 }
