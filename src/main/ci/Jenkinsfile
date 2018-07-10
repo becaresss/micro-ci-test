@@ -192,15 +192,15 @@ def executeTests(String branchDeploymentEnvironment) {
         case "dev":
             //TODO: Check which tests should be performed here!
             //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -DskipPTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
             break
         case "syt":
             //Executing performance tests...
-            mvn "clean verify -DskipUTs=true -DskipITs=true -Dremote.service.pt.host=${TASK_HOST} -Dremote.service.pt.port=${TASK_PORT}"
+            mvn "clean verify -DskipUTs=true -DskipITs=true -DskipPTs=false -Dremote.service.pt.host=${TASK_HOST} -Dremote.service.pt.port=${TASK_PORT}"
             break
         case "uat":
             //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -DskipPTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
+            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=${TASK_HOST}:${TASK_PORT}"
             break
         default:
             break
