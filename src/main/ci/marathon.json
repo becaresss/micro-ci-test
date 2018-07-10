@@ -31,13 +31,14 @@
   },
   "healthChecks": [
     {
-      "protocol": "HTTP",
-      "path": "/",
+      "protocol": "COMMAND",
+      "command": {
+        "value": "curl -f -X GET http://localhost:8080/health"
+      },
       "gracePeriodSeconds": 300,
-      "intervalSeconds": 60,
+      "intervalSeconds": 20,
       "timeoutSeconds": 20,
-      "maxConsecutiveFailures": 3,
-      "ignoreHttp1xx": false
+      "maxConsecutiveFailures": 10
     }
   ],
   "readinessChecks": null,
