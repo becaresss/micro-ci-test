@@ -202,7 +202,7 @@ def artifactId() {
 def build() {
     def v = version()
     currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-    mvn "clean deploy -DskipITs=true -DskipPTs=true -Dbawag.nexus.url=http://nexus.marathon.mesos:8081 sonar:sonar --settings /opt/settings.xml"
+    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar --settings /opt/settings.xml -Dbawag.nexus.url=http://nexus.marathon.mesos:8081"
     return false
 }
 
