@@ -180,7 +180,7 @@
 
     <repositories>
         <repository>
-            <id>bawag-nexus</id>
+            <id>nexus</id>
             <name>Bawag nexus</name>
             <url>${bawag.nexus.url}</url>
         </repository>
@@ -188,7 +188,7 @@
 
     <distributionManagement>
         <repository>
-            <id>bawag-nexus</id>
+            <id>nexus</id>
             <name>Bawag Nexus Releases</name>
             <url>${bawag.nexus.url}/releases</url>
         </repository>
