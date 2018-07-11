@@ -180,8 +180,6 @@ def mvn(String goals) {
     def mvnHome = tool "Maven-3.3.9"
 
     withCredentials([usernamePassword(credentialsId: 'githubuser', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
-                     string(credentialsId: 'nexusReleasesUrl', variable: 'NEXUS_RELEASES_URL'),
-                     string(credentialsId: 'nexusSnapshotsUrl', variable: 'NEXUS_SNAPSHOTS_URL'),
                      usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD'),
                      string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
 
