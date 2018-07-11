@@ -69,7 +69,7 @@
         <skipPTs>true</skipPTs>
         <remote.service.pt.host>localhost</remote.service.pt.host>
         <remote.service.pt.port>8080</remote.service.pt.port>
-        <bawag.nexus.url>http://bootstrap.stratio.bawag.com:12555/repository</bawag.nexus.url>
+        <bawag.nexus.url>http://nexus.marathon.mesos:8081</bawag.nexus.url>
     </properties>
 
     <build>
