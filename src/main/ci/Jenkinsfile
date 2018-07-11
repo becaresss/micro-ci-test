@@ -8,8 +8,8 @@ stage('build & unit tests & nexus & sonar') {
 
     node('jenkins-slave') {
         checkout scm
-        result = sh(script: "git log -1 | grep 'updating poms for'", returnStatus: true)
-        skipCi = result != 0 ? build() : true
+        result = sh(script: "git log -1 | grep 'updating poms'", returnStatus: true)
+        skipCi = result == 0 && ${env.BRANCH_NAME} == 'develop' ? true : build()
     }
 }
 
