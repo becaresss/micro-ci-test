@@ -18,14 +18,13 @@
     "AS_AUTOSCALE_MULTIPLIER": "1.5",
     "AS_TRIGGER_NUMBER": "2",
     "MICROSERVICES_HEAP_MB": "1768",
-    "PORT0": "8080",
     "APPROLE": {
       "secret": "role"
     }
   },
-  "instances": 1,
+  "instances": 2,
   "cpus": 0.5,
-  "mem": 1024,
+  "mem": 2048,
   "disk": 0,
   "gpus": 0,
   "executor": null,
@@ -43,11 +42,8 @@
       "portMappings": [
         {
           "containerPort": 8080,
-          "protocol": "tcp",
           "name": "app",
-          "labels": {
-            "VIP_0": "/@project.artifactId@:8080"
-          }
+          "protocol": "tcp"
         }
       ],
       "network": "USER"
@@ -55,10 +51,8 @@
   },
   "healthChecks": [
     {
-      "protocol": "COMMAND",
-      "command": {
-        "value": "curl -f -X GET http://@project.artifactId@.marathon.l4lb.thisdcos.directory:8080/health"
-      },
+      "protocol": "HTTP",
+      "path": "/health",
       "gracePeriodSeconds": 300,
       "intervalSeconds": 20,
       "timeoutSeconds": 20,
