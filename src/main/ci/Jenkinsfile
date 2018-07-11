@@ -185,7 +185,7 @@ def mvn(String goals) {
                      string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
 
         withEnv(["PATH+MAVEN=${mvnHome}/bin"]) {
-            sh "mvn -B ${goals}"
+            sh "mvn -B ${goals} --settings /opt/settings.xml"
         }
     }
 }
@@ -203,7 +203,7 @@ def artifactId() {
 def build() {
     def v = version()
     currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar --settings /opt/settings.xml"
+    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar"
     return false
 }
 
