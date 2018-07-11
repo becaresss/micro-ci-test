@@ -69,7 +69,6 @@
         <skipPTs>true</skipPTs>
         <remote.service.pt.host>localhost</remote.service.pt.host>
         <remote.service.pt.port>8080</remote.service.pt.port>
-        <bawag.nexus.url>http://nexus.marathon.l4lb.thisdcos.directory:8081</bawag.nexus.url>
     </properties>
 
     <build>
@@ -178,24 +177,16 @@
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <id>nexus</id>
-            <name>Bawag nexus</name>
-            <url>${bawag.nexus.url}</url>
-        </repository>
-    </repositories>
-
     <distributionManagement>
         <repository>
             <id>nexus</id>
             <name>Bawag Nexus Releases</name>
-            <url>${bawag.nexus.url}/releases</url>
+            <url>${env.NEXUS_URL}/releases</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Bawag Nexus Snapshots</name>
-            <url>${bawag.nexus.url}/snapshots</url>
+            <url>${env.NEXUS_URL}/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
