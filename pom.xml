@@ -5,7 +5,7 @@
 
     <groupId>com.stratio.aip</groupId>
     <artifactId>micro-ci-test</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <parent>
         <groupId>com.stratio.architecture</groupId>
@@ -168,10 +168,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipUTs}</skipTests>
+                    <excludes>
+                        <exclude>**/*IntegrationTest.java</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipITs}</skipTests>
+                    <includes>
+                        <include>**/*IntegrationTest.java</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
