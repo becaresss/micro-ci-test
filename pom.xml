@@ -69,6 +69,7 @@
         <skipPTs>true</skipPTs>
         <remote.service.pt.host>localhost</remote.service.pt.host>
         <remote.service.pt.port>8080</remote.service.pt.port>
+        <bawag.nexus.url>http://bootstrap.stratio.bawag.com:12555/repository</bawag.nexus.url>
     </properties>
 
     <build>
@@ -177,16 +178,24 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>bawag-nexus</id>
+            <name>Bawag nexus</name>
+            <url>${bawag.nexus.url}</url>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <repository>
-            <id>nexus</id>
+            <id>bawag-nexus</id>
             <name>Bawag Nexus Releases</name>
-            <url>${env.NEXUS_RELEASES_URL}</url>
+            <url>${bawag.nexus.url}/releases</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Bawag Nexus Snapshots</name>
-            <url>${env.NEXUS_SNAPSHOTS_URL}</url>
+            <url>${bawag.nexus.url}/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
