@@ -91,7 +91,7 @@ if (branchDeploymentEnvironment) {
 
             try {
                 timeout(time: 1, unit: 'HOURS') {
-                    input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branch_deployment_environment}, release will be created...'
+                    input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branchDeploymentEnvironment}, release will be created...'
                 }
             } catch (abort) {
                 echo "Job finished due to ${abort}..."
