@@ -43,7 +43,8 @@
         {
           "containerPort": 8080,
           "name": "app",
-          "protocol": "tcp"
+          "protocol": "tcp",
+          "servicePort": 0
         }
       ],
       "network": "USER"
