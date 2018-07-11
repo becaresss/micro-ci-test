@@ -182,7 +182,7 @@
         <repository>
             <id>nexus</id>
             <name>Bawag nexus</name>
-            <url>${bawag.nexus.url}</url>
+            <url>http://nexus.marathon.mesos:8081</url>
         </repository>
     </repositories>
 
