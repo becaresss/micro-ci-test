@@ -181,12 +181,12 @@
         <repository>
             <id>nexus</id>
             <name>Bawag Nexus Releases</name>
-            <url>${env.NEXUS_RELEASES_URL}</url>
+            <url>${env.NEXUS_URL}/releases</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Bawag Nexus Snapshots</name>
-            <url>${env.NEXUS_SNAPSHOTS_URL}</url>
+            <url>${env.NEXUS_URL}/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
