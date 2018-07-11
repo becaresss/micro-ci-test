@@ -180,7 +180,9 @@ def mvn(String goals) {
     def mvnHome = tool "Maven-3.3.9"
 
     withCredentials([usernamePassword(credentialsId: 'githubuser', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
-                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                     string(credentialsId: 'nexusUrl', variable: 'NEXUS_URL'),
+                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD'),
+                     string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
 
         withEnv(["PATH+MAVEN=${mvnHome}/bin"]) {
             sh "mvn -B ${goals}"
@@ -201,7 +203,7 @@ def artifactId() {
 def build() {
     def v = version()
     currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-    mvn "clean deploy -DskipITs=true -DskipPTs=true -Dbawag.nexus.url=http://nexus.marathon.l4lb.thisdcos.directory:8081 sonar:sonar --settings /opt/settings.xml"
+    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar --settings /opt/settings.xml"
     return false
 }
 
