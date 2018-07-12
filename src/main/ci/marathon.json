@@ -80,6 +80,7 @@
     "role": {
       "source": "open"
     }
+
   },
   "taskKillGracePeriodSeconds": null
 }
