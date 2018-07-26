@@ -15,3 +15,10 @@ buildNumber.properties
 .idea/
 micro-ci-test.iml
 
+gradlew
+gradlew.bat
+build/
+.gradle/
+
+
+
