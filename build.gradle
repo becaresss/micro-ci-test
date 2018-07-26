@@ -78,3 +78,24 @@ task unitTest(type: Test) {
 task integrationTest(type: Test) {
     include '**/integration/**'
 }
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://bootstrap.stratio.bawag.com:12555/repository/releases") {
+                authentication(userName: "admin", password: "admin123")
+            }
+            pom.version = project.property("project.version")
+            pom.artifactId = rootProject.name
+            pom.groupId = project.property("project.group")
+        }
+        mavenDeployer {
+            repository(url: "http://bootstrap.stratio.bawag.com:12555/repository/snapshots") {
+                authentication(userName: "admin", password: "admin123")
+            }
+            pom.version = project.property("project.version")
+            pom.artifactId = rootProject.name
+            pom.groupId = project.property("project.group")
+        }
+    }
+}
