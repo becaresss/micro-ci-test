@@ -29,7 +29,7 @@ if (branchDeploymentEnvironment) {
 
         node('jenkins-slave') {
 
-            gradle "buildDockerImage pushDockerImage"
+            gradle "clean assemble buildDockerImage pushDockerImage"
         }
     }
 
