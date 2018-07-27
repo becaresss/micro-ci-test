@@ -1,11 +1,19 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
-plugins {
-    id "net.foragerr.jmeter" version "1.0.5-2.13"
+buildscript {
+    apply from: "gitflow.gradle", to: buildscript
 }
+
+plugins {
+    id 'net.foragerr.jmeter' version '1.0.5-2.13'
+    id 'org.springframework.boot' version '1.5.9.RELEASE'
+    id "org.sonarqube" version "2.6.2"
+}
+
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'io.github.robwin.jgitflow'
 
 
 group = project.property("project.group")
@@ -62,8 +70,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.projectlombok:lombok'
     implementation 'commons-io:commons-io'
-    implementation 'com.stratio.architecture.microservices:stratio-microservices-monitoring'
-    implementation 'com.stratio.architecture.microservices:stratio-microservices-logging'
     implementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'info.cukes:cucumber-core'
     implementation 'info.cukes:cucumber-java'
@@ -82,8 +88,8 @@ task integrationTest(type: Test) {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "http://bootstrap.stratio.bawag.com:12555/repository/releases") {
-                authentication(userName: "admin", password: "admin123")
+            repository( url: "http://bootstrap.stratio.bawag.com:12555/repository/releases") {
+                authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
             pom.version = project.property("project.version")
             pom.artifactId = rootProject.name
@@ -91,7 +97,7 @@ uploadArchives {
         }
         mavenDeployer {
             repository(url: "http://bootstrap.stratio.bawag.com:12555/repository/snapshots") {
-                authentication(userName: "admin", password: "admin123")
+                authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
             pom.version = project.property("project.version")
             pom.artifactId = rootProject.name
