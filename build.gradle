@@ -18,7 +18,7 @@ apply plugin: 'maven'
 apply plugin: 'io.github.robwin.jgitflow'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-def artifactId = 'micro-ci-test'
+def artifactId = project.property("project.artifactId")
 group = project.property("project.group")
 version = project.property("project.version")
 
