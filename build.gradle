@@ -65,7 +65,7 @@ processResources {
 processTestResources {
     filter ReplaceTokens, tokens: [
             "jmeter.remoteServiceHost": project.property("jmeter.remoteServiceHost"),
-            "jmeter.renoteServiceHost": project.property("jmeter.remoteServicePort")
+            "jmeter.remoteServicePort": project.property("jmeter.remoteServicePort")
     ]
 }
 
