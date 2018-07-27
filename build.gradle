@@ -1,0 +1,107 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+    apply from: "gitflow.gradle", to: buildscript
+}
+
+plugins {
+    id 'net.foragerr.jmeter' version '1.0.5-2.13'
+    id 'org.springframework.boot' version '1.5.9.RELEASE'
+    id "org.sonarqube" version "2.6.2"
+}
+
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'io.github.robwin.jgitflow'
+
+
+group = project.property("project.group")
+version = project.property("project.version")
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "src/main/ci"
+        }
+    }
+    test {
+        resources {
+            srcDirs "src/test/resources", "src/test/jmeter"
+        }
+    }
+}
+
+processResources {
+    filter ReplaceTokens, tokens: [
+            "project.version"   : project.property("project.version"),
+            "project.group"     : project.property("project.group"),
+            "project.artifactId": rootProject.name,
+            "docker.registry.url": project.property("docker.registry.url")
+    ]
+}
+
+processTestResources {
+    filter ReplaceTokens, tokens: [
+            "jmeter.remoteServiceHost": project.property("jmeter.remoteServiceHost"),
+            "jmeter.renoteServiceHost": project.property("jmeter.remoteServicePort")
+    ]
+}
+
+repositories {
+    maven { url 'http://bootstrap.stratio.bawag.com:12555/repository/maven-central' }
+    maven { url 'http://bootstrap.stratio.bawag.com:12555/repository/releases' }
+    maven { url 'http://bootstrap.stratio.bawag.com:12555/repository/snapshots' }
+}
+
+
+dependencies {
+    implementation 'com.stratio.architecture:stratio-microservices-parent:0.4.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.projectlombok:lombok'
+    implementation 'commons-io:commons-io'
+    implementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'info.cukes:cucumber-core'
+    implementation 'info.cukes:cucumber-java'
+    implementation 'info.cukes:cucumber-junit'
+    implementation 'info.cukes:cucumber-spring'
+}
+
+task unitTest(type: Test) {
+    exclude '**/integration/**'
+}
+
+task integrationTest(type: Test) {
+    include '**/integration/**'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository( url: "http://bootstrap.stratio.bawag.com:12555/repository/releases") {
+                authentication(userName: bawagNexusUser, password: bawagNexusPassword)
+            }
+            pom.version = project.property("project.version")
+            pom.artifactId = rootProject.name
+            pom.groupId = project.property("project.group")
+        }
+        mavenDeployer {
+            repository(url: "http://bootstrap.stratio.bawag.com:12555/repository/snapshots") {
+                authentication(userName: bawagNexusUser, password: bawagNexusPassword)
+            }
+            pom.version = project.property("project.version")
+            pom.artifactId = rootProject.name
+            pom.groupId = project.property("project.group")
+        }
+    }
+}
