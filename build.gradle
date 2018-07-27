@@ -18,7 +18,7 @@ apply plugin: 'maven'
 apply plugin: 'io.github.robwin.jgitflow'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-def artifactId = project.property("project.artifactId")
+def artifactId = 'micro-ci-test'
 group = project.property("project.group")
 version = project.property("project.version")
 
@@ -57,8 +57,7 @@ processResources {
             "project.version"    : version,
             "project.group"      : project.property("project.group"),
             "project.artifactId" : artifactId,
-            "docker.registry.url": project.property("docker.registry.url"),
-            "jarFileLocation"    : buildDir.name
+            "docker.registry.url": project.property("docker.registry.url")
     ]
 }
 
