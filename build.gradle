@@ -1,7 +1,10 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
     apply from: "gitflow.gradle", to: buildscript
+    apply from: "docker.gradle", to: buildscript
 }
 
 plugins {
@@ -10,14 +13,17 @@ plugins {
     id "org.sonarqube" version "2.6.2"
 }
 
-
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'io.github.robwin.jgitflow'
+apply plugin: 'com.bmuschko.docker-remote-api'
 
-
+def artifactId = rootProject.name
 group = project.property("project.group")
 version = project.property("project.version")
+
+def nexusUrl = project.property("nexus.url")
+def dockerRegistryUrl = project.property("docker.registry.url")
 
 description = """"""
 
@@ -27,6 +33,11 @@ targetCompatibility = 1.8
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
+
+tasks.withType(Jar) {
+    destinationDir = file("$rootDir/build/resources/main/lib")
+}
+
 
 sourceSets {
     main {
@@ -43,10 +54,11 @@ sourceSets {
 
 processResources {
     filter ReplaceTokens, tokens: [
-            "project.version"   : project.property("project.version"),
-            "project.group"     : project.property("project.group"),
-            "project.artifactId": rootProject.name,
-            "docker.registry.url": project.property("docker.registry.url")
+            "project.version"    : version,
+            "project.group"      : project.property("project.group"),
+            "project.artifactId" : artifactId,
+            "docker.registry.url": project.property("docker.registry.url"),
+            "jarFileLocation"   : buildDir.name
     ]
 }
 
@@ -58,9 +70,10 @@ processTestResources {
 }
 
 repositories {
-    maven { url 'http://10.190.0.150:12555/repository/maven-central' }
-    maven { url 'http://10.190.0.150:12555/repository/releases' }
-    maven { url 'http://10.190.0.150:12555/repository/snapshots' }
+    maven { url "$nexusUrl/repository/maven-central" }
+    maven { url "$nexusUrl/repository/releases" }
+    maven { url "$nexusUrl/repository/snapshots" }
+    jcenter()
 }
 
 
@@ -85,23 +98,33 @@ task integrationTest(type: Test) {
     include '**/integration/**'
 }
 
+task buildDockerImage(type: DockerBuildImage) {
+    inputDir = file('build/resources/main')
+    tag = "$dockerRegistryUrl/$artifactId:$version"
+}
+
+task pushDockerImage(type: DockerPushImage) {
+    tag = version
+    imageName = "$dockerRegistryUrl/$artifactId"
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository( url: "http://10.190.0.150:12555/repository/releases") {
+            repository(url: "$nexusUrl/repository/releases") {
                 authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
-            pom.version = project.property("project.version")
-            pom.artifactId = rootProject.name
-            pom.groupId = project.property("project.group")
+            pom.version = version
+            pom.artifactId = artifactId
+            pom.groupId = group
         }
         mavenDeployer {
-            repository(url: "http://10.190.0.150:12555/repository/snapshots") {
+            repository(url: "$nexusUrl/repository/snapshots") {
                 authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
-            pom.version = project.property("project.version")
-            pom.artifactId = rootProject.name
-            pom.groupId = project.property("project.group")
+            pom.version = version
+            pom.artifactId = artifactId
+            pom.groupId = group
         }
     }
 }

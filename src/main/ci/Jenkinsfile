@@ -29,12 +29,7 @@ if (branchDeploymentEnvironment) {
 
         node('jenkins-slave') {
 
-            def artifactId = artifactIdGradle()
-
-            dir ('build/resources/main') {
-                sh 'docker build . -t bootstrap.stratio.bawag.com:5000/${artifactId}'
-                sh 'docker push bootstrap.stratio.bawag.com:5000/${artifactId}'
-            }
+            gradle "buildDockerImage pushDockerImage"
         }
     }
 
