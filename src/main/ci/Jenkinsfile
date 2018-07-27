@@ -204,7 +204,7 @@ def gradle(String tasks) {
                      string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
 
         withEnv(["PATH+GRADLE=${gradleHome}/bin"]) {
-            sh "gradle ${tasks} -Dnexus.url=${NEXUS_URL} -PbawagNexusUser=${bawagNexusUser} -PbawagNexusPassword=${bawagNexusPassword} -PgitUsername=${GIT_USER} -PgitPassword=${GIT_PASSWORD} -Dsonar.host.url=${SONAR_URL}"
+            sh "gradle ${tasks} -Pnexus.url=${NEXUS_URL} -PbawagNexusUser=${bawagNexusUser} -PbawagNexusPassword=${bawagNexusPassword} -PgitUsername=${GIT_USER} -PgitPassword=${GIT_PASSWORD} -Dsonar.host.url=${SONAR_URL}"
         }
     }
 }

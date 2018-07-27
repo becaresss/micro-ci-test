@@ -58,7 +58,7 @@ processResources {
             "project.group"      : project.property("project.group"),
             "project.artifactId" : artifactId,
             "docker.registry.url": project.property("docker.registry.url"),
-            "jarFileLocation"   : buildDir.name
+            "jarFileLocation"    : buildDir.name
     ]
 }
 
