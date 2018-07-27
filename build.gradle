@@ -58,9 +58,9 @@ processTestResources {
 }
 
 repositories {
-    maven { url 'http://bootstrap.stratio.bawag.com:12555/repository/maven-central' }
-    maven { url 'http://bootstrap.stratio.bawag.com:12555/repository/releases' }
-    maven { url 'http://bootstrap.stratio.bawag.com:12555/repository/snapshots' }
+    maven { url 'http://10.190.0.150:12555/repository/maven-central' }
+    maven { url 'http://10.190.0.150:12555/repository/releases' }
+    maven { url 'http://10.190.0.150:12555/repository/snapshots' }
 }
 
 
@@ -88,7 +88,7 @@ task integrationTest(type: Test) {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository( url: "http://bootstrap.stratio.bawag.com:12555/repository/releases") {
+            repository( url: "http://10.190.0.150:12555/repository/releases") {
                 authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
             pom.version = project.property("project.version")
@@ -96,7 +96,7 @@ uploadArchives {
             pom.groupId = project.property("project.group")
         }
         mavenDeployer {
-            repository(url: "http://bootstrap.stratio.bawag.com:12555/repository/snapshots") {
+            repository(url: "http://10.190.0.150:12555/repository/snapshots") {
                 authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
             pom.version = project.property("project.version")
