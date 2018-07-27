@@ -2,7 +2,7 @@ FROM csfstratio/dockerbase
 
 VOLUME /tmp
 
-ADD lib/@project.artifactId@-@project.version@.jar app.jar
+COPY lib/@project.artifactId@-@project.version@.jar app.jar
 
 ADD entrypoint.sh entrypoint.sh
 

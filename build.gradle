@@ -35,7 +35,7 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.withType(Jar) {
-    destinationDir = file("$rootDir/build/resources/main/lib")
+    destinationDir = file("build/resources/main/lib")
 }
 
 
