@@ -25,11 +25,11 @@ def branchDeploymentEnvironment = getBranchDeploymentEnvironment branchType
 
 if (branchDeploymentEnvironment) {
 
-    def artifactId = artifactIdGradle()
-
     stage('build docker image') {
 
         node('jenkins-slave') {
+
+            def artifactId = artifactIdGradle()
 
             dir 'build/resources/main' {
                 sh 'docker build . -t bootstrap.stratio.bawag.com:5000/${artifactId}'
