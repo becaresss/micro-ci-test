@@ -81,7 +81,8 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                gradle("releaseStart")
+                def version = versionGradle().replace('-SNAPSHOT', '')
+                gradle("releaseStart -PreleaseVersion=$version")
                 gradle("releasePublish")
             }
         }
@@ -117,7 +118,8 @@ if (branchDeploymentEnvironment) {
         stage('end release') {
 
             node('jenkins-slave') {
-                gradle("releaseFinish")
+                def version = versionGradle()
+                gradle("releaseFinish -PreleaseVersion=$version"")
             }
         }
 
