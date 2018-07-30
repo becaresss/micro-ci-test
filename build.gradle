@@ -9,8 +9,8 @@ buildscript {
 
 plugins {
     id 'net.foragerr.jmeter' version '1.0.10-3.3'
-    id 'org.springframework.boot' version '1.5.9.RELEASE'
     id "org.sonarqube" version "2.6.2"
+    id 'org.springframework.boot' version '1.5.9.RELEASE'
 }
 
 apply plugin: 'java'
@@ -35,7 +35,7 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.withType(Jar) {
-    destinationDir = file("build/resources/main")
+    destinationDir = file("build/resources/main/lib")
 }
 
 
@@ -77,16 +77,16 @@ repositories {
 
 
 dependencies {
-    implementation 'com.stratio.architecture:stratio-microservices-parent:0.4.0'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.projectlombok:lombok'
-    implementation 'commons-io:commons-io'
-    implementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'info.cukes:cucumber-core'
-    implementation 'info.cukes:cucumber-java'
-    implementation 'info.cukes:cucumber-junit'
-    implementation 'info.cukes:cucumber-spring'
+    compile 'com.stratio.architecture:stratio-microservices-parent:0.4.0'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.projectlombok:lombok'
+    compile 'commons-io:commons-io'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'info.cukes:cucumber-core'
+    testCompile 'info.cukes:cucumber-java'
+    testCompile 'info.cukes:cucumber-junit'
+    testCompile 'info.cukes:cucumber-spring'
 }
 
 task unitTest(type: Test) {
@@ -127,3 +127,4 @@ uploadArchives {
         }
     }
 }
+
