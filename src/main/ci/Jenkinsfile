@@ -81,8 +81,8 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                def version = versionGradle().replace('-SNAPSHOT', '')
-                gradle("releaseStart -PreleaseVersion=${version}")
+                gradle("initJGitflow")
+                gradle("releaseStart")
                 gradle("releasePublish")
             }
         }
