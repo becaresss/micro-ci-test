@@ -216,7 +216,7 @@ def version() {
 
 def versionGradle() {
     def props = readProperties  file: 'gradle.properties'
-    return props['project.version']
+    return props['version']
 }
 
 def artifactId() {
@@ -226,7 +226,7 @@ def artifactId() {
 
 def artifactIdGradle() {
     def props = readProperties  file: 'gradle.properties'
-    return props['project.artifactId']
+    return props['artifactId']
 }
 
 def build() {
