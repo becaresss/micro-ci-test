@@ -18,9 +18,9 @@ apply plugin: 'maven'
 apply plugin: 'io.github.robwin.jgitflow'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-def artifactId = project.property("project.artifactId")
-group = project.property("project.group")
-version = project.property("project.version")
+def artifactId = project.property("artifactId")
+group = project.property("group")
+version = project.property("version")
 
 def nexusUrl = project.property("nexus.url")
 def dockerRegistryUrl = project.property("docker.registry.url")
