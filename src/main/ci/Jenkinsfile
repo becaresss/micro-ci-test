@@ -10,7 +10,7 @@ stage('build & unit tests & nexus & sonar') {
         checkout scm
         ciSkipAfterStartRelease = sh(script: "git log -1 | grep 'updating poms'", returnStatus: true)
         ciSkipAfterFinishRelease = sh(script: "git log -1 | grep 'Updating develop poms back to pre merge state'", returnStatus: true)
-        skipCi = (ciSkipAfterStartRelease == 0 || ciSkipAfterFinishRelease == 0) && env.BRANCH_NAME == 'develop' ? true : build()
+        skipCi = (ciSkipAfterStartRelease == 0 || ciSkipAfterFinishRelease == 0) && env.BRANCH_NAME == 'develop' ? true : buildGradle()
     }
 }
 
@@ -28,7 +28,8 @@ if (branchDeploymentEnvironment) {
     stage('build docker image') {
 
         node('jenkins-slave') {
-            mvn "clean package docker:build -DpushImage -DskipTests"
+
+            gradle "buildDockerImage pushDockerImage"
         }
     }
 
@@ -49,7 +50,7 @@ if (branchDeploymentEnvironment) {
         }
 
         node('jenkins-slave') {
-            deployArtifact branchDeploymentEnvironment
+            deployArtifactGradle branchDeploymentEnvironment
         }
     }
 
@@ -59,7 +60,7 @@ if (branchDeploymentEnvironment) {
         stage('perform tests') {
 
             node('jenkins-slave') {
-                executeTests branchDeploymentEnvironment
+                executeTestsGradle branchDeploymentEnvironment
             }
         }
     }
@@ -81,9 +82,10 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                mvn("jgitflow:release-start")
+                gradle("initJGitflow releaseStart releasePublish --info")
             }
         }
+
     } else if (branchType == "release") {
 
         branchDeploymentEnvironment = "uat"
@@ -101,23 +103,24 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                deployArtifact branchDeploymentEnvironment
+                deployArtifactGradle branchDeploymentEnvironment
             }
         }
 
         stage('perform acceptation tests') {
 
             node('jenkins-slave') {
-                executeTests branchDeploymentEnvironment
+                executeTestsGradle branchDeploymentEnvironment
             }
         }
 
         stage('end release') {
 
             node('jenkins-slave') {
-                mvn("jgitflow:release-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
+                gradle("releaseFinish -DnoDeploy=true")
             }
         }
+
     } else if (branchType == "hotfix") {
 
         stage('finish hotfix') {
@@ -133,7 +136,7 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                mvn("jgitflow:hotfix-finish -Dmaven.javadoc.skip=true -DnoDeploy=true")
+                gradle("hotfixFinish -DnoDeploy=true")
             }
         }
     }
@@ -191,9 +194,29 @@ def mvn(String goals) {
     }
 }
 
+def gradle(String tasks) {
+
+    def gradleHome = tool "Gradle-4.9"
+
+    withCredentials([usernamePassword(credentialsId: 'githubuser', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
+                     string(credentialsId: 'nexusUrl', variable: 'NEXUS_URL'),
+                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'bawagNexusUser', passwordVariable: 'bawagNexusPassword'),
+                     string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
+
+        withEnv(["PATH+GRADLE=${gradleHome}/bin"]) {
+            sh "gradle ${tasks} -PbawagNexusUser=${bawagNexusUser} -PbawagNexusPassword=${bawagNexusPassword} -PgitUsername=${GIT_USER} -PgitPassword=${GIT_PASSWORD} -Dsonar.host.url=${SONAR_URL}"
+        }
+    }
+}
+
 def version() {
     def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
     return matcher ? matcher[0][1] : null
+}
+
+def versionGradle() {
+    def props = readProperties  file: 'gradle.properties'
+    return props['version']
 }
 
 def artifactId() {
@@ -201,10 +224,22 @@ def artifactId() {
     return matcher ? matcher[0][1] : null
 }
 
+def artifactIdGradle() {
+    def props = readProperties  file: 'gradle.properties'
+    return props['artifactId']
+}
+
 def build() {
     def v = version()
     currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
     mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar"
+    return false
+}
+
+def buildGradle() {
+    def v = versionGradle()
+    currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
+    gradle "clean unitTest assemble sonarqube uploadArchives"
     return false
 }
 
@@ -233,6 +268,30 @@ def executeTests(String branchDeploymentEnvironment) {
     }
 }
 
+def executeTestsGradle(String branchDeploymentEnvironment) {
+
+    def artifactId = artifactIdGradle()
+
+    switch (branchDeploymentEnvironment) {
+
+        case "dev":
+            //TODO: Check which tests should be performed here!
+            //Executing integration tests...
+            gradle "clean integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
+            break
+        case "syt":
+            //Executing performance tests...
+            gradle "jmClean jmRun -Dremote.service.pt.host=${artifactId}.marathon.mesos -Dremote.service.pt.port=8080"
+            break
+        case "uat":
+            //Executing integration tests...
+            gradle "clean integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
+            break
+        default:
+            break
+    }
+}
+
 def deployArtifact(String branchDeploymentEnvironment) {
 
     withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branchDeploymentEnvironment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
@@ -241,6 +300,22 @@ def deployArtifact(String branchDeploymentEnvironment) {
 
 
         def artifactId = artifactId()
+
+        withEnv(["ARTIFACT_ID=${artifactId}"]) {
+            sh "echo Deploying to ${branchDeploymentEnvironment}"
+            sh "/opt/dcos_deploy.sh"
+        }
+    }
+}
+
+def deployArtifactGradle(String branchDeploymentEnvironment) {
+
+    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branchDeploymentEnvironment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
+                     string(credentialsId: 'dcosLoginUrl_' + branchDeploymentEnvironment, variable: 'DCOS_LOGIN_URL'),
+                     string(credentialsId: 'marathonApiUrl_' + branchDeploymentEnvironment, variable: 'MARATHON_API_URL')]) {
+
+
+        def artifactId = artifactIdGradle()
 
         withEnv(["ARTIFACT_ID=${artifactId}"]) {
             sh "echo Deploying to ${branchDeploymentEnvironment}"

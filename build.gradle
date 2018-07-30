@@ -1,0 +1,130 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import org.apache.tools.ant.filters.ReplaceTokens
+
+buildscript {
+    apply from: "gitflow.gradle", to: buildscript
+    apply from: "docker.gradle", to: buildscript
+}
+
+plugins {
+    id 'net.foragerr.jmeter' version '1.0.10-3.3'
+    id "org.sonarqube" version "2.6.2"
+    id 'org.springframework.boot' version '1.5.9.RELEASE'
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'io.github.robwin.jgitflow'
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+def artifactId = project.property("artifactId")
+group = project.property("group")
+version = project.property("version")
+
+def nexusUrl = project.property("nexus.url")
+def dockerRegistryUrl = project.property("docker.registry.url")
+
+description = """"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Jar) {
+    destinationDir = file("build/resources/main/lib")
+}
+
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "src/main/ci"
+        }
+    }
+    test {
+        resources {
+            srcDirs "src/test/resources", "src/test/jmeter"
+        }
+    }
+}
+
+processResources {
+    filter ReplaceTokens, tokens: [
+            "project.version"    : project.property("version"),
+            "project.group"      : project.property("group"),
+            "project.artifactId" : artifactId,
+            "docker.registry.url": project.property("docker.registry.url")
+    ]
+}
+
+processTestResources {
+    filter ReplaceTokens, tokens: [
+            "jmeter.remoteServiceHost": project.property("jmeter.remoteServiceHost"),
+            "jmeter.remoteServicePort": project.property("jmeter.remoteServicePort")
+    ]
+}
+
+repositories {
+    maven { url "$nexusUrl/repository/maven-central" }
+    maven { url "$nexusUrl/repository/releases" }
+    maven { url "$nexusUrl/repository/snapshots" }
+    jcenter()
+}
+
+
+dependencies {
+    compile 'com.stratio.architecture:stratio-microservices-parent:0.4.0'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.projectlombok:lombok'
+    compile 'commons-io:commons-io'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'info.cukes:cucumber-core'
+    testCompile 'info.cukes:cucumber-java'
+    testCompile 'info.cukes:cucumber-junit'
+    testCompile 'info.cukes:cucumber-spring'
+}
+
+task unitTest(type: Test) {
+    exclude '**/integration/**'
+}
+
+task integrationTest(type: Test) {
+    include '**/integration/**'
+}
+
+task buildDockerImage(type: DockerBuildImage) {
+    inputDir = file('build/resources/main')
+    tag = "$dockerRegistryUrl/$artifactId:$version"
+}
+
+task pushDockerImage(type: DockerPushImage) {
+    tag = version
+    imageName = "$dockerRegistryUrl/$artifactId"
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "$nexusUrl/repository/releases") {
+                authentication(userName: bawagNexusUser, password: bawagNexusPassword)
+            }
+            pom.version = version
+            pom.artifactId = artifactId
+            pom.groupId = group
+        }
+        mavenDeployer {
+            repository(url: "$nexusUrl/repository/snapshots") {
+                authentication(userName: bawagNexusUser, password: bawagNexusPassword)
+            }
+            pom.version = version
+            pom.artifactId = artifactId
+            pom.groupId = group
+        }
+    }
+}
+
