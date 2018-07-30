@@ -119,7 +119,7 @@ if (branchDeploymentEnvironment) {
 
             node('jenkins-slave') {
                 gradle("initJGitflow")
-                gradle("releaseStart")
+                sh 'git checkout release/1.0.8'
                 gradle("releaseFinish")
             }
         }
