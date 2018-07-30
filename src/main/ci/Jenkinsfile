@@ -118,8 +118,9 @@ if (branchDeploymentEnvironment) {
         stage('end release') {
 
             node('jenkins-slave') {
-                def version = versionGradle()
-                gradle("releaseFinish -PreleaseVersion=${version}")
+                gradle("initJGitflow")
+                gradle("releaseStart")
+                gradle("releaseFinish")
             }
         }
 
