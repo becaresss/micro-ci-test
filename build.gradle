@@ -54,8 +54,8 @@ sourceSets {
 
 processResources {
     filter ReplaceTokens, tokens: [
-            "project.version"    : version,
-            "project.group"      : group,
+            "project.version"    : project.property("version"),
+            "project.group"      : project.property("group"),
             "project.artifactId" : artifactId,
             "docker.registry.url": project.property("docker.registry.url")
     ]
