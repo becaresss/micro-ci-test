@@ -28,7 +28,6 @@ if (branchDeploymentEnvironment) {
     stage('build docker image') {
 
         node('jenkins-slave') {
-
             gradle "buildDockerImage pushDockerImage"
         }
     }
@@ -82,7 +81,8 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                gradle("initJGitflow releaseStart releasePublish --info")
+                gradle("releaseStart")
+                gradle("releasePublish")
             }
         }
 
@@ -94,7 +94,7 @@ if (branchDeploymentEnvironment) {
 
             try {
                 timeout(time: 1, unit: 'HOURS') {
-                    input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against ${branchDeploymentEnvironment}, release will be created...'
+                    input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against uat environment, release will be created...'
                 }
             } catch (abort) {
                 echo "Job finished due to ${abort}..."
@@ -117,7 +117,7 @@ if (branchDeploymentEnvironment) {
         stage('end release') {
 
             node('jenkins-slave') {
-                gradle("releaseFinish -DnoDeploy=true")
+                gradle("releaseFinish")
             }
         }
 
@@ -136,7 +136,7 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                gradle("hotfixFinish -DnoDeploy=true")
+                gradle("hotfixFinish")
             }
         }
     }
@@ -272,6 +272,9 @@ def executeTestsGradle(String branchDeploymentEnvironment) {
 
     def artifactId = artifactIdGradle()
 
+    echo "Waiting to Mesos DNS to register service..."
+    sleep 60
+
     switch (branchDeploymentEnvironment) {
 
         case "dev":
@@ -281,11 +284,11 @@ def executeTestsGradle(String branchDeploymentEnvironment) {
             break
         case "syt":
             //Executing performance tests...
-            gradle "jmClean jmRun -Dremote.service.pt.host=${artifactId}.marathon.mesos -Dremote.service.pt.port=8080"
+            gradle "clean processTestResources assemble jmRun -Pjmeter.remoteServiceHost=${artifactId}.marathon.mesos -Pjmeter.remoteServicePort=8080"
             break
         case "uat":
             //Executing integration tests...
-            gradle "clean integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
+            gradle "integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
             break
         default:
             break

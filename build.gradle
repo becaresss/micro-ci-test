@@ -107,23 +107,25 @@ task pushDockerImage(type: DockerPushImage) {
     imageName = "$dockerRegistryUrl/$artifactId"
 }
 
+jmeter {
+    jmTestFiles = [file("build/resources/test/example.jmx")]
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: "$nexusUrl/repository/releases") {
                 authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
-            pom.version = version
-            pom.artifactId = artifactId
-            pom.groupId = group
-        }
-        mavenDeployer {
-            repository(url: "$nexusUrl/repository/snapshots") {
+            snapshotRepository(url: "$nexusUrl/repository/snapshots") {
                 authentication(userName: bawagNexusUser, password: bawagNexusPassword)
             }
-            pom.version = version
-            pom.artifactId = artifactId
-            pom.groupId = group
+            pom {
+                version = version
+                artifactId = artifactId
+                groupId = group
+            }
+
         }
     }
 }
