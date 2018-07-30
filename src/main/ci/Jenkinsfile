@@ -82,7 +82,7 @@ if (branchDeploymentEnvironment) {
             }
 
             node('jenkins-slave') {
-                gradle("releaseStart")
+                gradle("releaseStart releasePublish --info")
             }
         }
 
