@@ -59,6 +59,7 @@ processResources {
             "project.artifactId" : artifactId,
             "docker.registry.url": project.property("docker.registry.url")
     ]
+
 }
 
 processTestResources {
