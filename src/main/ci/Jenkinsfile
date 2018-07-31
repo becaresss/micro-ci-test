@@ -2,22 +2,12 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
 
-def skipCi = false
-
 stage('build & unit tests & nexus & sonar') {
 
     node('jenkins-slave') {
         checkout scm
-        ciSkipAfterStartRelease = sh(script: "git log -1 | grep 'updating poms'", returnStatus: true)
-        ciSkipAfterFinishRelease = sh(script: "git log -1 | grep 'Updating develop poms back to pre merge state'", returnStatus: true)
-        skipCi = (ciSkipAfterStartRelease == 0 || ciSkipAfterFinishRelease == 0) && env.BRANCH_NAME == 'develop' ? true : buildGradle()
+        buildGradle()
     }
-}
-
-if (skipCi) {
-    echo "ci-skip step reached!. Mark job to be finished successfully..."
-    currentBuild.result = 'SUCCESS'
-    return
 }
 
 def branchType = getBranchType "${env.BRANCH_NAME}"
@@ -64,7 +54,6 @@ if (branchDeploymentEnvironment) {
         }
     }
 
-
     if (branchType == "dev") {
 
         stage('start release') {
@@ -94,6 +83,7 @@ if (branchDeploymentEnvironment) {
         stage('deploy release candidate to UAT') {
 
             try {
+
                 timeout(time: 1, unit: 'HOURS') {
                     input 'Do you want to execute a release process? If so, after deployment and integration tests successfully passed against uat environment, release will be created...'
                 }
@@ -118,8 +108,9 @@ if (branchDeploymentEnvironment) {
         stage('end release') {
 
             node('jenkins-slave') {
+                def v = versionGradle()
                 gradle("initJGitflow")
-                sh 'git checkout release/1.0.8'
+                sh "git checkout release/${v}"
                 gradle("releaseFinish")
             }
         }
@@ -182,20 +173,6 @@ def getBranchDeploymentEnvironment(String branchType) {
     }
 }
 
-def mvn(String goals) {
-
-    def mvnHome = tool "Maven-3.3.9"
-
-    withCredentials([usernamePassword(credentialsId: 'githubuser', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD'),
-                     string(credentialsId: 'nexusUrl', variable: 'NEXUS_URL'),
-                     usernamePassword(credentialsId: 'nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD'),
-                     string(credentialsId: 'sonarUrl', variable: 'SONAR_URL')]) {
-
-        withEnv(["PATH+MAVEN=${mvnHome}/bin"]) {
-            sh "mvn -B ${goals} --settings /opt/settings.xml"
-        }
-    }
-}
 
 def gradle(String tasks) {
 
@@ -212,31 +189,14 @@ def gradle(String tasks) {
     }
 }
 
-def version() {
-    def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
-    return matcher ? matcher[0][1] : null
-}
-
 def versionGradle() {
     def props = readProperties  file: 'gradle.properties'
     return props['version']
 }
 
-def artifactId() {
-    def matcher = readFile('pom.xml') =~ '<artifactId>(.+)</artifactId>'
-    return matcher ? matcher[0][1] : null
-}
-
 def artifactIdGradle() {
     def props = readProperties  file: 'gradle.properties'
     return props['artifactId']
-}
-
-def build() {
-    def v = version()
-    currentBuild.displayName = "${env.BRANCH_NAME}-${v}-${env.BUILD_NUMBER}"
-    mvn "clean deploy -DskipITs=true -DskipPTs=true sonar:sonar"
-    return false
 }
 
 def buildGradle() {
@@ -246,42 +206,16 @@ def buildGradle() {
     return false
 }
 
-
-def executeTests(String branchDeploymentEnvironment) {
-
-    def artifactId = artifactId()
-
-    switch (branchDeploymentEnvironment) {
-
-        case "dev":
-            //TODO: Check which tests should be performed here!
-            //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
-            break
-        case "syt":
-            //Executing performance tests...
-            mvn "clean verify -DskipUTs=true -DskipITs=true -DskipPTs=false -Dremote.service.pt.host=${artifactId}.marathon.mesos -Dremote.service.pt.port=8080"
-            break
-        case "uat":
-            //Executing integration tests...
-            mvn "clean verify -DskipUTs=true -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
-            break
-        default:
-            break
-    }
-}
-
 def executeTestsGradle(String branchDeploymentEnvironment) {
 
     def artifactId = artifactIdGradle()
 
-    echo "Waiting to Mesos DNS to register service..."
-    sleep 60
+    echo "Waiting for Mesos DNS to register service..."
+    sleep 30
 
     switch (branchDeploymentEnvironment) {
 
         case "dev":
-            //TODO: Check which tests should be performed here!
             //Executing integration tests...
             gradle "clean integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
             break
@@ -291,28 +225,13 @@ def executeTestsGradle(String branchDeploymentEnvironment) {
             break
         case "uat":
             //Executing integration tests...
-            gradle "integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
+            gradle "clean integrationTest -Dremote.service.it.url=http://${artifactId}.marathon.mesos:8080"
             break
         default:
             break
     }
 }
 
-def deployArtifact(String branchDeploymentEnvironment) {
-
-    withCredentials([usernamePassword(credentialsId: 'jenkinsDcos_' + branchDeploymentEnvironment, usernameVariable: 'USER_ID', passwordVariable: 'USER_PASSWORD'),
-                     string(credentialsId: 'dcosLoginUrl_' + branchDeploymentEnvironment, variable: 'DCOS_LOGIN_URL'),
-                     string(credentialsId: 'marathonApiUrl_' + branchDeploymentEnvironment, variable: 'MARATHON_API_URL')]) {
-
-
-        def artifactId = artifactId()
-
-        withEnv(["ARTIFACT_ID=${artifactId}"]) {
-            sh "echo Deploying to ${branchDeploymentEnvironment}"
-            sh "/opt/dcos_deploy.sh"
-        }
-    }
-}
 
 def deployArtifactGradle(String branchDeploymentEnvironment) {
 

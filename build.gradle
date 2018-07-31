@@ -35,7 +35,7 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.withType(Jar) {
-    destinationDir = file("build/resources/main/lib")
+    destinationDir = file("${getSourceSets().getByName('main').getOutput().resourcesDir}/lib")
 }
 
 
@@ -99,7 +99,7 @@ task integrationTest(type: Test) {
 }
 
 task buildDockerImage(type: DockerBuildImage) {
-    inputDir = file('build/resources/main')
+    inputDir = file(getSourceSets().getByName('main').getOutput().resourcesDir)
     tag = "$dockerRegistryUrl/$artifactId:$version"
 }
 
@@ -109,7 +109,7 @@ task pushDockerImage(type: DockerPushImage) {
 }
 
 jmeter {
-    jmTestFiles = [file("build/resources/test/example.jmx")]
+    jmTestFiles = [file("${getSourceSets().getByName('test').getOutput().resourcesDir}/example.jmx")]
 }
 
 uploadArchives {
@@ -126,7 +126,6 @@ uploadArchives {
                 artifactId = artifactId
                 groupId = group
             }
-
         }
     }
 }
