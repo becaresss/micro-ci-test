@@ -210,7 +210,7 @@ def executeTestsGradle(String branchDeploymentEnvironment) {
 
     def artifactId = artifactIdGradle()
 
-    echo "Waiting to Mesos DNS to register service..."
+    echo "Waiting for Mesos DNS to register service..."
     sleep 30
 
     switch (branchDeploymentEnvironment) {
@@ -221,7 +221,7 @@ def executeTestsGradle(String branchDeploymentEnvironment) {
             break
         case "syt":
             //Executing performance tests...
-            gradle "clean processTestResources jmRun -Pjmeter.remoteServiceHost=${artifactId}.marathon.mesos -Pjmeter.remoteServicePort=8080"
+            gradle "clean processTestResources assemble jmRun -Pjmeter.remoteServiceHost=${artifactId}.marathon.mesos -Pjmeter.remoteServicePort=8080"
             break
         case "uat":
             //Executing integration tests...
